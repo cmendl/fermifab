@@ -1,0 +1,9 @@
+
+# ignore binary MEX files
+*.mexw32
+*.mexw64
+*.mexa32
+*.mexa64
+
+# ignore binary executable files
+*.exe
