@@ -19,6 +19,7 @@ CCOPTS = -Wall -m64 -O3
 all: fermifabML
 
 fermifabML: bitfield.o boson_map.o fermi_map.o fermifab_mlink_linux.o fermifabML.o generate_rdm.o slater_rdm.o spintrace_coul.o util.o
+	mkdir -p fermifabML/${SYS}
 	${CC} ${CCOPTS} -L${CADDSDIR} -L${MATHLDIR} -l${MLLIB} ${EXTRALIBS} -o fermifabML/${SYS}/$@ $?
 
 %.o: src/%.c
