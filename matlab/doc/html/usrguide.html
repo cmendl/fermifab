@@ -1,0 +1,421 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>FermiFab User's Guide (Matlab version)</title><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-09-04"><meta name="DC.source" content="usrguide.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>FermiFab User's Guide (Matlab version)</h1><!--introduction--><p><img style="float: right;" border: 0px; src="fermifab.png" alt="FermiFab" /></p><p>Christian B. Mendl, 2008-2015</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">1.1  What is FermiFab?</a></li><li><a href="#2">1.2 Fermi states</a></li><li><a href="#7">1.3 Reduced density matrices (RDMs)</a></li><li><a href="#10">1.4 Symbolic computations</a></li><li><a href="#11">1.5 Tensor products of operators</a></li><li><a href="#14">1.6 State configurations</a></li><li><a href="#21">1.7 References</a></li></ul></div><h2>1.1  What is FermiFab?<a name="1"></a></h2><p>FermiFab stands for "fermion laboratory" and is a quantum physics toolbox for small numbers of fermions. It is mainly concerned with the representation of (symbolic) fermionic wavefunctions and the calculation of their reduced density matrices (RDMs). The toolbox transparently handles the inherent antisymmetrization of wavefunctions and incorporates the creation and annihilation formalism.</p><p>FermiFab is available at <a href="http://sourceforge.net/projects/fermifab">http://sourceforge.net/projects/fermifab</a>.</p><h2>1.2 Fermi states<a name="2"></a></h2><p>A fundamental building block of multi-fermion quantum mechanics are Slater determinants, which you can think of as a collection of "orbitals" (or slots), some of which are occupied by a fermionic particle (e.g., an electron):</p><p><img vspace="5" hspace="5" src="slater.png" alt=""> </p><p>In this illustration, each circle represents an orbital, and the filled circles denote occupied orbitals. In mathematical terms, the available number of orbitals 'orbs' is the dimension of the underlying single-particle Hilbert space <script type="math/tex">\mathcal{H}</script> and the number of occupied orbitals is the particle number <script type="math/tex">N</script>. Thus there are altogether</p><p><script type="math/tex">{\mathrm{orbs} \choose N}</script></p><p>Slater determinants. Each quantum mechanical Fermi state is a linear combination of these Slater determinants with complex coefficients. Formally, the quantum Fermi state is an element of the <script type="math/tex">N</script>-particle <i>Fock space</i> <script type="math/tex">\wedge^N \mathcal{H}</script>.</p><p>In FermiFab, you can define, say, a <script type="math/tex">N = 4</script> particle state (or wavefunction) <script type="math/tex">\psi</script> and 6 available orbitals with the <tt>fermistate</tt> command:</p><pre class="codeinput">orbs = 6; N = 4;
+x = zeros(nchoosek(orbs,N),1); x(1)=1/sqrt(2); x(2)=1i/sqrt(2);
+psi = fermistate(orbs,N,x)
+</pre><pre class="codeoutput">
+psi = 
+	Fermi State (orbs == 6, N == 4)
+	(0.70711)|1234&gt; + (0+0.70711i)|1235&gt;
+
+</pre><p>The vector <script type="math/tex">x</script> contains the Slater determinant coefficients of <script type="math/tex">\psi</script> in lexicographical order. Let's assign names to the orbitals of <script type="math/tex">\psi</script>:</p><pre class="codeinput">psi = set(psi,<span class="string">'orbnames'</span>,{<span class="string">'1s'</span> <span class="string">'1s~'</span> <span class="string">'2s'</span> <span class="string">'2s~'</span> <span class="string">'2p'</span> <span class="string">'2p~'</span>})
+</pre><pre class="codeoutput">
+psi = 
+	Fermi State (orbs == 6, N == 4)
+	(0.70711)|1s 1s~ 2s 2s~&gt; + (0+0.70711i)|1s 1s~ 2s 2p&gt;
+
+</pre><p>In this example, the names denote electronic subshells of atoms, with the tilde ~ representing spin-down, otherwise spin-up.</p><p>The rank-one projector in bra-ket notation</p><p><script type="math/tex">\vert\psi\rangle \langle\psi\vert</script></p><p>or "density matrix" of <script type="math/tex">\psi</script> can be calculated intuitively by</p><pre class="codeinput">psi*psi'
+</pre><pre class="codeoutput">
+ans = 
+	Fermi Operator wedge^4 H -&gt; wedge^4 H (orbs == 6)
+
+Matrix representation w.r.t. ordered Slater basis
+(|1s 1s~ 2s 2s~&gt;, |1s 1s~ 2s 2p&gt;, ... |2s 2s~ 2p 2p~&gt;) -&gt; (|1s 1s~ 2s 2s~&gt;, |1s 1s~ 2s 2p&gt;, ... |2s 2s~ 2p 2p~&gt;):
+
+  Columns 1 through 4
+
+   0.5000 + 0.0000i   0.0000 - 0.5000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.5000i   0.5000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+...</pre><p>Note that the result is now an <i>operator</i> acting on the 4-particle antisymmetrized Hilbert space <script type="math/tex">\wedge^4 \mathcal{H}</script> !</p><h2>1.3 Reduced density matrices (RDMs)<a name="7"></a></h2><p>The core feature of the toolbox is the efficient calculation of reduced density matrices. For example, the two-body reduced density matrix <script type="math/tex">\Gamma_{\psi}</script> defined by</p><p><script type="math/tex">\langle ij\vert \Gamma_{\psi} \vert kl\rangle
+= \langle\psi\vert a^{\dagger}_k a^{\dagger}_l a_j a_i \vert\psi\rangle</script></p><p>can be calculated by the <tt>rdm</tt> command as</p><pre class="codeinput">rdm(psi,2)
+</pre><pre class="codeoutput">
+ans = 
+	Fermi Operator wedge^2 H -&gt; wedge^2 H (orbs == 6)
+
+Matrix representation w.r.t. ordered Slater basis
+(|1s 1s~&gt;, |1s 2s&gt;, ... |2p 2p~&gt;) -&gt; (|1s 1s~&gt;, |1s 2s&gt;, ... |2p 2p~&gt;):
+
+  Columns 1 through 4
+
+   1.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   1.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   1.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.5000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i
+   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.0000i   0.0000 + 0.5000i
+...</pre><p>In the above formula, <script type="math/tex">a^{\dagger}_i</script> and <script type="math/tex">a_i</script> denote creation and annihilation operators, respectively.</p><p>More generally, for wavefunctions <script type="math/tex">\psi_k \in \wedge^{N_k}\mathcal{H}</script> and orthonormal basis sets <script type="math/tex">(\varphi_{ki})_i</script> of <script type="math/tex">\wedge^{p_k}\mathcal{H}</script> with <script type="math/tex">1 \le p_k \le N_k</script> and <script type="math/tex">k = 1,2</script>, define the reduced density matrix</p><p><script type="math/tex">\gamma_{\vert\psi_1\rangle\langle\psi_2\vert}:
+\wedge^{p_2}\mathcal{H} \to \wedge^{p_1}\mathcal{H}</script></p><p>by</p><p><script type="math/tex">\langle\varphi_{1j}\vert \gamma_{\vert\psi_1\rangle\langle\psi_2\vert} \vert\varphi_{2i}\rangle
+:= \langle\psi_2\vert a^{\dagger}_{\varphi_{2i}} a_{\varphi_{1j}} \vert\psi_1\rangle
+ = \langle a_{\varphi_{2i}} \psi_2 \vert a_{\varphi_{1j}} \psi_1\rangle.</script></p><p>The significance of this definition can be seen as follows. Any linear map <script type="math/tex">b: \wedge^{p_1}\mathcal{H} \to \wedge^{p_2}\mathcal{H}</script> with matrix representation <script type="math/tex">\left(b_{ij}\right)</script> may be "lifted" to an operator <script type="math/tex">B: \wedge^{N_1}\mathcal{H} \to \wedge^{N_2}\mathcal{H}</script> by</p><p><script type="math/tex">B = \sum_{i,j} b_{ij}\,a^\dagger_{\varphi_{2i}} a_{\varphi_{1j}},</script></p><p>implemented as <tt>p2N</tt> in FermiFab. A prominent example is the Coulomb operator with <script type="math/tex">p_1 = p_2 = 2</script>, which describes the <i>pairwise</i> interaction between charged particles. Now, the <script type="math/tex">B</script> expectation value with respect to <script type="math/tex">\vert\psi_1\rangle\langle\psi_2\vert</script> equals</p><p><script type="math/tex">\langle\psi_2\vert B \vert\psi_1\rangle
+\equiv \sum_{i,j} b_{ij} \langle\psi_2\vert a^{\dagger}_{\varphi_{2i}} a_{\varphi_{1j}} \vert\psi_1\rangle
+= \mathrm{tr}\big[ b\,\gamma_{\vert\psi_1\rangle\langle\psi_2\vert}\big].</script></p><p>In other words, this equation switches from <script type="math/tex">\wedge^{N_k}\mathcal{H}</script> to <script type="math/tex">\wedge^{p_k}\mathcal{H}</script> for <script type="math/tex">k = 1,2</script>. For many applications, this is the only possibility to avoid the "curse of dimensionality" induced by the large <script type="math/tex">N_1</script>, <script type="math/tex">N_2</script>-particle systems.</p><h2>1.4 Symbolic computations<a name="10"></a></h2><p>FermiFab is compatible with the "Symbolic Math Toolbox". So you may insert symbolic variables as well in the above examples (assuming the Symbolic Math Toolbox is installed)</p><pre class="codeinput">syms <span class="string">a</span> <span class="string">b</span> <span class="string">c</span>
+y = sym(zeros(1,nchoosek(orbs,N)));
+y(1) = a; y(3) = 1i*b^2; y(4) = 1/c;
+psi = set(psi,<span class="string">'data'</span>,y)
+rdm(psi,2)
+</pre><pre class="codeoutput">
+psi = 
+	Fermi State (orbs == 6, N == 4)
+	(a)|1s 1s~ 2s 2s~&gt; + (b^2*i)|1s 1s~ 2s~ 2p&gt; + (1/c)|1s 2s 2s~ 2p&gt;
+
+
+ans = 
+	Fermi Operator wedge^2 H -&gt; wedge^2 H (orbs == 6)
+
+Matrix representation w.r.t. ordered Slater basis
+(|1s 1s~&gt;, |1s 2s&gt;, ... |2p 2p~&gt;) -&gt; (|1s 1s~&gt;, |1s 2s&gt;, ... |2p 2p~&gt;):
+
+[ abs(a)^2 + abs(b)^4,       (b^2*i)/conj(c),              0,                                0,                   0,                     0,             a/conj(c),                0,               0,                     0, 0, 0, 0, 0, 0]
+[    -(conj(b)^2*i)/c, abs(a)^2 + 1/abs(c)^2,              0,                                0,                   0,                     0,         a*conj(b)^2*i,                0,               0,                     0, 0, 0, 0, 0, 0]
+[                   0,                     0,       abs(a)^2,                                0,                   0,                     0,                     0,    a*conj(b)^2*i,      -a/conj(c),                     0, 0, 0, 0, 0, 0]
+[                   0,                     0,              0, abs(a)^2 + abs(b)^4 + 1/abs(c)^2,                   0,                     0,                     0,                0,               0,                     0, 0, 0, 0, 0, 0]
+...</pre><h2>1.5 Tensor products of operators<a name="11"></a></h2><p>For any linear operator (i.e., matrix) <script type="math/tex">A: \mathcal{H} \to \mathcal{H}</script>, it holds that</p><p><script type="math/tex">\langle j_1,\dots,j_N \vert (A \otimes\cdots\otimes A) \vert i_1,\dots,i_N \rangle
+= \det \langle j_k \vert A \vert i_\ell\rangle_{k,\ell}.</script></p><p>That is, we obtain a matrix representation of <script type="math/tex">A \otimes\cdots\otimes A</script> acting on <script type="math/tex">\wedge^N \mathcal{H}</script>. The <tt>tensor_op</tt> command implements precisely this operation. The following code lines are taken from the "natural orbitals" example in test/norbs.m:</p><pre class="codeinput">orbs = 6; N = 4;
+psi = fermistate(orbs,N,crand(nchoosek(orbs,N),1));
+[U,D] = eig(rdm(psi,1));
+</pre><p><tt>crand</tt> generates pseudorandom complex numbers (similar to <tt>rand</tt>), and <tt>eig</tt> computes eigenvalues and -vectors. Thus, the eigenvectors of the one-body reduced density matrix of <script type="math/tex">\psi</script> are stored in <script type="math/tex">U</script>. Performing a corresponding base change on <script type="math/tex">\wedge^N \mathcal{H}</script> using these eigenvectors should result in a diagonal one-body RDM [L&ouml;wdin 1955]:</p><pre class="codeinput">psi = tensor_op(U,N)'*psi;
+G = get(rdm(psi,1),<span class="string">'data'</span>);
+err = norm(G-diag(diag(G)))
+</pre><pre class="codeoutput">
+err =
+
+   1.2530e-15
+
+</pre><p>In many physical applications, one can take advantage of unitary base changes on <script type="math/tex">\mathcal{H}</script> such that subsequent computations are simplified. The above code shows how to implement the according base change on <script type="math/tex">\wedge^N \mathcal{H}</script>.</p><h2>1.6 State configurations<a name="14"></a></h2><p>For performance and memory efficiency reasons, the concept of "configurations" are built into FermiFab, i.e. you can partition the orbitals into several groups, each containing a fixed number of particles. Let's say your system involves 3 particles in 9 orbitals, with exactly 2 particles in the first 5 orbitals and 1 particle in the remaining 4 orbitals. Then a <tt>fermistate</tt> reflecting this configuration is specified by</p><pre class="codeinput">orbs = [5,4]; N = [2,1];
+psi = fermistate(orbs,N)
+</pre><pre class="codeoutput">
+psi = 
+	Fermi State (orbs == 9, N == 3)
+	|126&gt;
+
+</pre><p>Note that <script type="math/tex">\vert126\rangle</script> is the lexicographically first basis vector respecting the configuration constraints, and that <script type="math/tex">\psi</script> requires only</p><p><script type="math/tex">{5 \choose 2} \cdot {4 \choose 1} = 40</script></p><p>rather than <script type="math/tex">{9 \choose 3} = 84</script> complex entries:</p><pre class="codeinput">length(psi)
+</pre><pre class="codeoutput">
+ans =
+
+    40
+
+</pre><p>The command <tt>rdm</tt> works transparently for all configurations, so <script type="math/tex">\psi</script> behaves like a standard 9-orbital 3-particle state.</p><p>What happens if you add two <tt>fermistate</tt> wavefunctions with different but compatible configurations (i.e., the total number of orbitals and particles agrees)?</p><pre class="codeinput">orbs = [2,7]; N = [1,2];
+phi = fermistate(orbs,N)
+</pre><pre class="codeoutput">
+phi = 
+	Fermi State (orbs == 9, N == 3)
+	|134&gt;
+
+</pre><pre class="codeinput">length(phi)
+</pre><pre class="codeoutput">
+ans =
+
+    42
+
+</pre><p>Adding <script type="math/tex">\psi</script> and <script type="math/tex">\varphi</script> gives</p><pre class="codeinput">chi = psi+phi
+</pre><pre class="codeoutput">
+chi = 
+	Fermi State (orbs == 9, N == 3)
+	|134&gt; + |126&gt;
+
+</pre><p>as expected - so how is this accomplished? FermiFab has detected that it needs to merge the two configurations, resulting in the full-fledged 9-orbital 3-particle state, which is reflected by</p><pre class="codeinput">length(chi)
+</pre><pre class="codeoutput">
+ans =
+
+    84
+
+</pre><h2>1.7 References<a name="21"></a></h2><div><ul><li>[Mendl 2011] C. B. Mendl.   <i>The FermiFab toolbox for fermionic many-particle quantum systems</i>.   Comput. Phys. Commun. 182, 1327-1337 (2011)   <a href="http://dx.doi.org/10.1016/j.cpc.2011.01.028">DOI</a>,   preprint <a href="http://arxiv.org/abs/1103.0872">http://arxiv.org/abs/1103.0872</a></li><li>[Mazziotti 2007] D. A. Mazziotti.   <i>Reduced-density-matrix mechanics: with application to many-electron atoms and molecules</i>.   Advances in Chemical Physics 134, Wiley (2007)</li><li>[Coleman &amp; Yukalov 2000] A. J. Coleman and V. I. Yukalov.   <i>Reduced density matrices: Coulson's challenge</i>.   Lecture Notes in Chemistry 72, Springer (2000)</li><li>[Ando 1963] T. Ando.   <i>Properties of Fermion density matrices</i>.   Rev. Mod. Phys. 35, 690&#8211;702 (1963)   <a href="http://dx.doi.org/10.1103/RevModPhys.35.690">DOI</a></li><li>[L&ouml;wdin 1955] P.-O. L&ouml;wdin.   <i>Quantum theory of many-particle systems I</i>.   Phys. Rev. 97, 1474&#8211;1489 (1955)   <a href="http://dx.doi.org/10.1103/PhysRev.97.1474">DOI</a></li></ul></div><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% FermiFab User's Guide (Matlab version)
+%
+% <html><img style="float: right;" border: 0px; src="fermifab.png" alt="FermiFab" /></html>
+%
+% Christian B. Mendl, 2008-2015
+
+
+%% 1.1  What is FermiFab?
+%
+% FermiFab stands for "fermion laboratory" and is a quantum physics toolbox
+% for small numbers of fermions. It is mainly concerned with the
+% representation of (symbolic) fermionic wavefunctions and the calculation
+% of their reduced density matrices (RDMs). The toolbox transparently
+% handles the inherent antisymmetrization of wavefunctions and incorporates
+% the creation and annihilation formalism.
+%
+% FermiFab is available at <http://sourceforge.net/projects/fermifab>.
+
+
+%% 1.2 Fermi states
+% A fundamental building block of multi-fermion quantum mechanics are Slater
+% determinants, which you can think of as a collection of "orbitals" (or slots),
+% some of which are occupied by a fermionic particle (e.g., an electron):
+%
+% <<slater.png>>
+%
+% In this illustration, each circle represents an orbital, and the
+% filled circles denote occupied orbitals.
+% In mathematical terms, the available number of orbitals 'orbs' is the
+% dimension of the underlying single-particle Hilbert space $\mathcal{H}$
+% and the number of occupied orbitals is the particle number $N$.
+% Thus there are altogether
+%
+% $${\mathrm{orbs} \choose N}$$
+%
+% Slater determinants. Each quantum mechanical Fermi state is a linear
+% combination of these Slater determinants with complex coefficients.
+% Formally, the quantum Fermi state is an element of the $N$-particle
+% _Fock space_ $\wedge^N \mathcal{H}$.
+%
+% In FermiFab, you can define, say, a $N = 4$ particle state (or wavefunction)
+% $\psi$ and 6 available orbitals with the |fermistate| command:
+orbs = 6; N = 4;
+x = zeros(nchoosek(orbs,N),1); x(1)=1/sqrt(2); x(2)=1i/sqrt(2);
+psi = fermistate(orbs,N,x)
+
+%%
+% The vector $x$ contains the Slater determinant coefficients of $\psi$ in
+% lexicographical order. Let's assign names to the orbitals of $\psi$:
+psi = set(psi,'orbnames',{'1s' '1s~' '2s' '2s~' '2p' '2p~'})
+
+%%
+% In this example, the names denote electronic subshells of atoms,
+% with the tilde ~ representing spin-down, otherwise spin-up.
+
+%%
+% The rank-one projector in bra-ket notation
+%
+% $$\vert\psi\rangle \langle\psi\vert$$
+%
+% or "density matrix" of $\psi$ can be calculated intuitively by
+psi*psi'
+
+%%
+% Note that the result is now an _operator_ acting on the 4-particle
+% antisymmetrized Hilbert space $\wedge^4 \mathcal{H}$ !
+
+
+%% 1.3 Reduced density matrices (RDMs)
+% The core feature of the toolbox is the efficient calculation of reduced density matrices.
+% For example, the two-body reduced density matrix $\Gamma_{\psi}$ defined by
+%
+% $$\langle ij\vert \Gamma_{\psi} \vert kl\rangle
+% = \langle\psi\vert a^{\dagger}_k a^{\dagger}_l a_j a_i \vert\psi\rangle$$
+%
+% can be calculated by the |rdm| command as
+rdm(psi,2)
+
+%%
+% In the above formula, $a^{\dagger}_i$ and $a_i$ denote creation and
+% annihilation operators, respectively.
+
+%%
+% More generally, for wavefunctions $\psi_k \in \wedge^{N_k}\mathcal{H}$
+% and orthonormal basis sets $(\varphi_{ki})_i$ of $\wedge^{p_k}\mathcal{H}$
+% with $1 \le p_k \le N_k$ and $k = 1,2$,
+% define the reduced density matrix
+%
+% $$\gamma_{\vert\psi_1\rangle\langle\psi_2\vert}:
+% \wedge^{p_2}\mathcal{H} \to \wedge^{p_1}\mathcal{H}$$
+%
+% by
+%
+% $$\langle\varphi_{1j}\vert \gamma_{\vert\psi_1\rangle\langle\psi_2\vert} \vert\varphi_{2i}\rangle
+% := \langle\psi_2\vert a^{\dagger}_{\varphi_{2i}} a_{\varphi_{1j}} \vert\psi_1\rangle
+%  = \langle a_{\varphi_{2i}} \psi_2 \vert a_{\varphi_{1j}} \psi_1\rangle.$$
+%
+% The significance of this definition can be seen as follows.
+% Any linear map $b: \wedge^{p_1}\mathcal{H} \to \wedge^{p_2}\mathcal{H}$
+% with matrix representation $\left(b_{ij}\right)$ may be "lifted" to
+% an operator $B: \wedge^{N_1}\mathcal{H} \to \wedge^{N_2}\mathcal{H}$ by
+%
+% $$B = \sum_{i,j} b_{ij}\,a^\dagger_{\varphi_{2i}} a_{\varphi_{1j}},$$
+%
+% implemented as |p2N| in FermiFab.
+% A prominent example is the Coulomb operator with $p_1 = p_2 = 2$,
+% which describes the _pairwise_ interaction between charged particles.
+% Now, the $B$ expectation value with respect to $\vert\psi_1\rangle\langle\psi_2\vert$ equals
+%
+% $$\langle\psi_2\vert B \vert\psi_1\rangle
+% \equiv \sum_{i,j} b_{ij} \langle\psi_2\vert a^{\dagger}_{\varphi_{2i}} a_{\varphi_{1j}} \vert\psi_1\rangle
+% = \mathrm{tr}\big[ b\,\gamma_{\vert\psi_1\rangle\langle\psi_2\vert}\big].$$
+%
+% In other words, this equation switches from $\wedge^{N_k}\mathcal{H}$ to
+% $\wedge^{p_k}\mathcal{H}$ for $k = 1,2$.
+% For many applications, this is the only possibility to avoid the
+% "curse of dimensionality" induced by the large $N_1$, $N_2$-particle systems.
+
+
+%% 1.4 Symbolic computations
+% FermiFab is compatible with the "Symbolic Math Toolbox".
+% So you may insert symbolic variables as well in the
+% above examples (assuming the Symbolic Math Toolbox is installed)
+syms a b c
+y = sym(zeros(1,nchoosek(orbs,N)));
+y(1) = a; y(3) = 1i*b^2; y(4) = 1/c;
+psi = set(psi,'data',y)
+rdm(psi,2)
+
+
+%% 1.5 Tensor products of operators
+% For any linear operator (i.e., matrix) $A: \mathcal{H} \to \mathcal{H}$,
+% it holds that
+%
+% $$\langle j_1,\dots,j_N \vert (A \otimes\cdots\otimes A) \vert i_1,\dots,i_N \rangle
+% = \det \langle j_k \vert A \vert i_\ell\rangle_{k,\ell}.$$
+%
+% That is, we obtain a matrix representation of $A \otimes\cdots\otimes A$
+% acting on $\wedge^N \mathcal{H}$.
+% The |tensor_op| command implements precisely this operation.
+% The following code lines are taken from the "natural orbitals" example
+% in test/norbs.m:
+orbs = 6; N = 4;
+psi = fermistate(orbs,N,crand(nchoosek(orbs,N),1));
+[U,D] = eig(rdm(psi,1));
+
+%%
+% |crand| generates pseudorandom complex numbers (similar to |rand|),
+% and |eig| computes eigenvalues and -vectors. Thus, the eigenvectors of the
+% one-body reduced density matrix of $\psi$ are stored in $U$.
+% Performing a corresponding base change on $\wedge^N \mathcal{H}$ using these eigenvectors
+% should result in a diagonal one-body RDM [Löwdin 1955]:
+psi = tensor_op(U,N)'*psi;
+G = get(rdm(psi,1),'data');
+err = norm(G-diag(diag(G)))
+
+%%
+% In many physical applications, one can take advantage of unitary base changes
+% on $\mathcal{H}$ such that subsequent computations are simplified.
+% The above code shows how to implement the according base change on $\wedge^N \mathcal{H}$.
+
+
+%% 1.6 State configurations
+% For performance and memory efficiency reasons, the concept of "configurations"
+% are built into FermiFab, i.e. you can partition the orbitals
+% into several groups, each containing a fixed number of particles.
+% Let's say your system involves 3 particles in 9 orbitals, with exactly 2 particles
+% in the first 5 orbitals and 1 particle in the remaining 4 orbitals. Then a
+% |fermistate| reflecting this configuration is specified by
+orbs = [5,4]; N = [2,1];
+psi = fermistate(orbs,N)
+
+%%
+% Note that $\vert126\rangle$ is the lexicographically first basis vector
+% respecting the configuration constraints, and that $\psi$ requires only
+%
+% $${5 \choose 2} \cdot {4 \choose 1} = 40$$
+%
+% rather than ${9 \choose 3} = 84$ complex entries:
+length(psi)
+
+%%
+% The command |rdm| works transparently for all configurations,
+% so $\psi$ behaves like a standard 9-orbital 3-particle state.
+
+%%
+% What happens if you add two |fermistate| wavefunctions with different but compatible
+% configurations (i.e., the total number of orbitals and particles agrees)?
+orbs = [2,7]; N = [1,2];
+phi = fermistate(orbs,N)
+%%
+length(phi)
+%%
+% Adding $\psi$ and $\varphi$ gives
+chi = psi+phi
+%%
+% as expected - so how is this accomplished? FermiFab has detected that
+% it needs to merge the two configurations, resulting in the full-fledged
+% 9-orbital 3-particle state, which is reflected by
+length(chi)
+
+
+%% 1.7 References
+%
+% * [Mendl 2011] C. B. Mendl.
+%   _The FermiFab toolbox for fermionic many-particle quantum systems_.
+%   Comput. Phys. Commun. 182, 1327-1337 (2011)
+%   <http://dx.doi.org/10.1016/j.cpc.2011.01.028 DOI>,
+%   preprint <http://arxiv.org/abs/1103.0872>
+% * [Mazziotti 2007] D. A. Mazziotti.
+%   _Reduced-density-matrix mechanics: with application to many-electron atoms and molecules_.
+%   Advances in Chemical Physics 134, Wiley (2007)
+% * [Coleman & Yukalov 2000] A. J. Coleman and V. I. Yukalov.
+%   _Reduced density matrices: Coulson's challenge_.
+%   Lecture Notes in Chemistry 72, Springer (2000)
+% * [Ando 1963] T. Ando.
+%   _Properties of Fermion density matrices_.
+%   Rev. Mod. Phys. 35, 690–702 (1963)
+%   <http://dx.doi.org/10.1103/RevModPhys.35.690 DOI>
+% * [Löwdin 1955] P.-O. Löwdin.
+%   _Quantum theory of many-particle systems I_.
+%   Phys. Rev. 97, 1474–1489 (1955)
+%   <http://dx.doi.org/10.1103/PhysRev.97.1474 DOI>
+
+##### SOURCE END #####
+--></body></html>

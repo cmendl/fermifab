@@ -5,5 +5,16 @@
 *.mexa32
 *.mexa64
 
+# ignore compiled C object files
+*.o
+*.obj
+
+# ignore Visual Studio auto-generated files
+Debug/
+Release/
+*.suo
+*.sdf
+*.opensdf
+
 # ignore binary executable files
 *.exe
