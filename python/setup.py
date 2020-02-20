@@ -1,0 +1,21 @@
+from numpy.distutils.core import setup, Extension
+
+
+srcfiles = ['fermifab_module.c', 'bitfield.c', 'boson_map.c', 'fermi_map.c', 'generate_rdm.c', 'sparse.c', 'util.c']
+module = Extension('fermifab.kernel',
+                   sources=['fermifab/src/' + file for file in srcfiles],
+                   include_dirs=['fermifab/include'],
+                   extra_link_args=['-lm'])
+
+setup(
+    name='fermifab',
+    description='FermiFab toolbox for fermionic many-particle quantum systems',
+    version='1.0.0',
+    author='Ismael Medina-Suárez, Christian B. Mendl',
+    url='https://github.com/cmendl/fermifab',
+    packages=['fermifab'],
+    ext_modules=[module],
+    install_requires=[
+        'numpy>=1.9',
+        'scipy>=1.0.0',
+    ])
