@@ -1,7 +1,7 @@
 from fermifab.kernel import gen_rdm
 import numpy as np
 from scipy.sparse import csr_matrix
-
+from fermiop import FermiOp
 
 __all__ = ['rdm']
 
@@ -47,4 +47,4 @@ def rdm(state, p):
     for i in range(G.shape[0]):
         for j in range(G.shape[1]):
             G[i, j] = np.vdot(state.data, K[i][j].dot(state.data))
-    return G
+    return FermiOp(state.orbs, p, p, data=G)
