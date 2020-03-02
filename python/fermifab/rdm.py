@@ -1,7 +1,7 @@
 from fermifab.kernel import gen_rdm
 import numpy as np
 from scipy.sparse import csr_matrix
-from fermiop import FermiOp
+from fermifab.fermiop import FermiOp
 
 __all__ = ['rdm']
 
