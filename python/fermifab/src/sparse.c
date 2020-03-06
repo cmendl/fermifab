@@ -18,7 +18,9 @@
 //
 
 #include "sparse.h"
+#include "util.h"
 #include <stdlib.h>
+#include <memory.h>
 
 
 void DeleteSparseArray(sparse_array_t *a)
@@ -29,4 +31,39 @@ void DeleteSparseArray(sparse_array_t *a)
 
 	a->nnz  = 0;
 	a->rank = 0;
+}
+
+
+//________________________________________________________________________________________________________________________
+///
+/// \brief Convert tensor index to data offset (row major ordering)
+///
+static inline int IndexToOffset(const int rank, const int *dims, const int *ind)
+{
+	int i;
+	int offset = 0;
+	int stride = 1;
+	for (i = rank-1; i >= 0; i--)
+	{
+		offset += stride*ind[i];
+		stride *= dims[i];
+	}
+
+	return offset;
+}
+
+
+//________________________________________________________________________________________________________________________
+///
+/// \brief Convert a sparse to a dense array, assuming that memory for target array has been allocated
+///
+void SparseToDense(const sparse_array_t *a, double *dns)
+{
+	memset(dns, 0, IntegerProduct(a->dims, a->rank) * sizeof(double));
+
+	int i;
+	for (i = 0; i < a->nnz; i++)
+	{
+		dns[IndexToOffset(a->rank, a->dims, &a->ind[a->rank*i])] = a->val[i];
+	}
 }

@@ -19,23 +19,47 @@
 
 #pragma once
 
+#include <assert.h>
+
 
 //________________________________________________________________________________________________________________________
 ///
 /// \brief Calculate the sum of a list of integers
 ///
-static inline int IntegerSum(const int *list, const int n)
+static inline int IntegerSum(const int *x, const int n)
 {
-	int i, ret;
-
-	ret = 0;
+	int sum = 0;
+	int i;
 	for (i = 0; i < n; i++)
 	{
-		ret += list[i];
+		sum += x[i];
 	}
 
-	return ret;
+	return sum;
 }
+
+
+//________________________________________________________________________________________________________________________
+///
+/// \brief Calculate the product of a list of integer numbers
+///
+static inline int IntegerProduct(const int *x, const int n)
+{
+	assert(n >= 0); // n == 0 is still reasonable
+
+	int prod = 1;
+	int i;
+	for (i = 0; i < n; i++)
+	{
+		prod *= x[i];
+	}
+
+	return prod;
+}
+
+
+//________________________________________________________________________________________________________________________
+//
 
 
 // return 0 if k > n and 1 if k == 0

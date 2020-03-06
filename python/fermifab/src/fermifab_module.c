@@ -3,6 +3,7 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 #include "generate_rdm.h"
+#include "tensor_op.h"
 #include <inttypes.h>
 
 
@@ -264,8 +265,87 @@ static PyObject *gen_rdm(PyObject *self, PyObject *args)
 //
 
 
+static PyObject *tensor_op(PyObject *self, PyObject *args)
+{
+	PyObject *Ain;
+	int N;
+	if (!PyArg_ParseTuple(args, "Ok", &Ain, &N)) {
+		PyErr_SetString(PyExc_SyntaxError, "error parsing input; syntax: tensor_op(A, N)");
+		return NULL;
+	}
+
+	if (N <= 0) {
+		PyErr_SetString(PyExc_ValueError, "'N' must be positive; syntax: tensor_op(A, N)");
+		return NULL;
+	}
+
+	PyArrayObject *A = (PyArrayObject *)PyArray_ContiguousFromObject(Ain, NPY_DOUBLE, 2, 2);
+	if (A == NULL) {
+		PyErr_SetString(PyExc_ValueError, "cannot interpret 'A' as matrix");
+		return NULL;
+	}
+
+	if (PyArray_DIM(A, 0) != PyArray_DIM(A, 1))
+	{
+		PyErr_SetString(PyExc_ValueError, "'A' must be a square matrix");
+		Py_DECREF(A);
+		return NULL;
+	}
+
+	const int orbs = PyArray_DIM(A, 0);
+
+	sparse_array_t AN = { 0 };
+	int status = TensorOp(orbs, N, PyArray_DATA(A), &AN);
+	if (status < 0) {
+		PyErr_SetString(PyExc_RuntimeError, "internal error occurred, probably out of memory");
+		DeleteSparseArray(&AN);
+		Py_DECREF(A);
+		return NULL;
+	}
+
+	Py_DECREF(A);
+
+	// dimensions
+	assert(AN.rank == 2);
+	PyObject *dims_obj = Py_BuildValue("(ii)", AN.dims[0], AN.dims[1]);
+
+	// construct array of values
+	npy_intp dims_val[1] = { AN.nnz };
+	PyArrayObject *val_arr = (PyArrayObject *)PyArray_SimpleNew(1, dims_val, NPY_DOUBLE);
+	if (val_arr == NULL) {
+		PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned value vector");
+		Py_DECREF(dims_obj);
+		DeleteSparseArray(&AN);
+		return NULL;
+	}
+	memcpy(PyArray_DATA(val_arr), AN.val, AN.nnz * sizeof(double));
+
+	// construct array of indices
+	npy_intp dims_ind[2] = { AN.nnz, AN.rank };
+	PyArrayObject *ind_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims_ind, sizeof(AN.ind[0]) == 4 ? NPY_INT32 : NPY_INT64);
+	if (ind_arr == NULL) {
+		PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned array of indices");
+		Py_DECREF(dims_obj);
+		Py_DECREF(val_arr);
+		DeleteSparseArray(&AN);
+		return NULL;
+	}
+	memcpy(PyArray_DATA(ind_arr), AN.ind, AN.nnz*AN.rank * sizeof(AN.ind[0]));
+
+	// clean up
+	DeleteSparseArray(&AN);
+
+	return Py_BuildValue("(OOO)", dims_obj, val_arr, ind_arr);
+}
+
+
+//________________________________________________________________________________________________________________________
+//
+
+
 static PyMethodDef methods[] = {
-	{ "gen_rdm", gen_rdm, METH_VARARGS, "Generate sparse kernel tensor for computing reduced density matrices." },
+	{ "gen_rdm",   gen_rdm,   METH_VARARGS, "Generate sparse kernel tensor for computing reduced density matrices." },
+	{ "tensor_op", tensor_op, METH_VARARGS, "Matrix representation of the N-fold tensor product of an operator." },
 	{ NULL, NULL, 0, NULL }     // sentinel
 };
 

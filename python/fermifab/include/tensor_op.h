@@ -1,5 +1,5 @@
-/// \file sparse.h
-/// \brief Sparse arrays.
+/// \file tensor_op.h
+/// \brief Calculate the tensor product (A otimes A ... otimes A): wedge^N H -> wedge^N H for an operator A: H -> H.
 //
 //  Copyright (c) 2008-2020, Christian B. Mendl
 //  All rights reserved.
@@ -19,23 +19,10 @@
 
 #pragma once
 
-
-//________________________________________________________________________________________________________________________
-///
-/// \brief Sparse array structure
-///
-typedef struct
-{
-	double *val;    //!< non-zero values
-	int *ind;       //!< corresponding indices (matrix of dimension 'nnz x rank')
-	int *dims;      //!< dimensions (vector of length 'rank')
-	int nnz;        //!< number of non-zero entries
-	int rank;       //!< array rank
-}
-sparse_array_t;
+#include "sparse.h"
 
 
-void DeleteSparseArray(sparse_array_t *a);
+double Det(const int n, double *A);
 
 
-void SparseToDense(const sparse_array_t *a, double *mat);
+int TensorOp(const int orbs, const int N, const double *A, sparse_array_t *AN);

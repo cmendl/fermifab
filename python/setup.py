@@ -1,11 +1,11 @@
 from numpy.distutils.core import setup, Extension
 
 
-srcfiles = ['fermifab_module.c', 'bitfield.c', 'boson_map.c', 'fermi_map.c', 'generate_rdm.c', 'sparse.c', 'util.c']
+srcfiles = ['fermifab_module.c', 'bitfield.c', 'boson_map.c', 'fermi_map.c', 'generate_rdm.c', 'sparse.c', 'tensor_op.c', 'util.c']
 module = Extension('fermifab.kernel',
                    sources=['fermifab/src/' + file for file in srcfiles],
-                   include_dirs=['fermifab/include'],
-                   extra_link_args=['-lm'])
+                   include_dirs=['fermifab/include', '/usr/include/x86_64-linux-gnu']
+                   extra_link_args=['-lm', '-lblas', '-llapacke'])
 
 setup(
     name='fermifab',
