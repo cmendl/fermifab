@@ -294,6 +294,12 @@ static PyObject *tensor_op(PyObject *self, PyObject *args)
 
 	const int orbs = PyArray_DIM(A, 0);
 
+	if (N > orbs) {
+		PyErr_SetString(PyExc_ValueError, "'N' cannot be larger than number of orbitals; syntax: tensor_op(A, N)");
+		Py_DECREF(A);
+		return NULL;
+	}
+
 	sparse_array_t AN = { 0 };
 	int status = TensorOp(orbs, N, PyArray_DATA(A), &AN);
 	if (status < 0) {
