@@ -1,7 +1,7 @@
 # Makefile for standalone tests
 
 # source files
-SRCFILES = src/bitfield.c src/boson_map.c src/fermi_map.c src/generate_rdm.c src/sparse.c src/.c src/tensor_op.c src/util.c
+SRCFILES = src/bitfield.c src/boson_map.c src/fermi_map.c src/generate_rdm.c src/sparse.c src/tensor_op.c src/util.c
 # test files
 TSTFILES = test/binio.c test/test_tensor_op.c
 
@@ -11,7 +11,8 @@ CCOPTS = -Wall -O2
 # set these with appropriate include paths for your system
 INCLUDIRS = -Iinclude -I/usr/include/x86_64-linux-gnu
 
-# set these with appropriate libraries for your system
+# set these with appropriate libraries for your system;
+# the CBLAS and LAPACKE libraries can be installed via `sudo apt install libblas-dev liblapacke-dev` (on Ubuntu Linux) or similar
 LIBRARIES = -lm -lblas -llapacke
 
 
