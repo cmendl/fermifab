@@ -83,8 +83,8 @@ int TensorOp(const int orbs, const int N, const double *A, sparse_array_t *AN)
 	fermi_map_t baseMap;
 	{
 		fermi_config_t config;
-		config.orbs = &orbs;
-		config.N    = &N;
+		config.orbs = (int []){orbs};
+		config.N    = (int []){N};
 		config.nc   = 1;
 		status = FermiMap(&config, &baseMap);
 		if (status < 0) { return status; }
