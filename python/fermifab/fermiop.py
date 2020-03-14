@@ -22,6 +22,14 @@ class FermiOp(object):
         data_info = self.data.__repr__()
         return state_info + "\n\nMatrix representation w.r.t. ordered Slater basis:\n\n" + data_info
 
+
+    def dagger(self):
+        return FermiOp(self.orbs, self.pTo, self.pFrom, self.data.conj().T)
+    
+    @property
+    def T(self):
+        return self.dagger()
+
     def __mul__(self, other):
         if type(other) in [float, int, complex]:
             return FermiOp(self.orbs, self.pFrom, self.pTo, data = other*self.data)
