@@ -269,7 +269,7 @@ static PyObject *tensor_op(PyObject *self, PyObject *args)
 {
 	PyObject *Ain;
 	int N;
-	if (!PyArg_ParseTuple(args, "Ok", &Ain, &N)) {
+	if (!PyArg_ParseTuple(args, "Oi", &Ain, &N)) {
 		PyErr_SetString(PyExc_SyntaxError, "error parsing input; syntax: tensor_op(A, N)");
 		return NULL;
 	}
