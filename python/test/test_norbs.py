@@ -16,15 +16,19 @@ def norbs(orbs, N):
 
     state = fermifab.FermiOp(orbs, 1, 1, data=U)
     stateN = fermifab.tensor_op(state, N)
-    psi = stateN.T * psi
+    psi = stateN.T @ psi
 
     G = fermifab.rdm(psi,1).data
 
     err = np.linalg.norm(np.diag(np.diag(G)) - G)
     return psi, err
 
-if __name__ == '__main__':
+def test_norbs():
     orbs = 6
     N = 4
     _, err = norbs(orbs, N)
-    np.testing.assert_almost_equal(err, 0, 10)
+    np.testing.assert_almost_equal(err, 0)
+
+if __name__ == '__main__':
+    test_norbs()
+    
