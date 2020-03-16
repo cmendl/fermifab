@@ -5,8 +5,22 @@ from fermifab.fermiop import *
 __all__ = ['FermiState']
 
 class FermiState(object):
-
+    
     def __init__(self, orbs, N, data=None):
+        """Construct a Fermi state
+
+        Parameters:
+        ---------
+        orbs:   int
+                Number of orbitals.
+
+        N:      int
+                Number of particles.
+
+        data:   NumPy array, optional
+                State vector.
+                
+        """
         self.orbs = orbs
         self.N = N
         if data is not None:

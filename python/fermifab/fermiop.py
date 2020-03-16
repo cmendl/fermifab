@@ -5,8 +5,26 @@ from scipy.special import binom
 __all__ = ['FermiOp']
 
 class FermiOp(object):
+    
 
     def __init__(self, orbs, pFrom, pTo, data=None):
+        """Construct a Fermi operator between two Hilbert spaces.
+
+        Parameters:
+        ---------
+        orbs:   int
+                Number of orbitals.
+
+        pFrom:  int
+                Number of particles in the input Hilbert space.
+
+        pTo:    int
+                Number of particles in the output Hilbert space.
+
+        data:   NumPy array, optional
+                Operator matrix.
+
+        """
         self.orbs = orbs
         self.pFrom = pFrom
         self.pTo = pTo
@@ -22,6 +40,17 @@ class FermiOp(object):
         data_info = self.data.__repr__()
         return state_info + "\n\nMatrix representation w.r.t. ordered Slater basis:\n\n" + data_info
 
+    def __add__(self, other):
+        assert ((self.orbs == other.orbs) & (self.pFrom == other.pFrom) & (self.pTo == other.pTo))
+        new_state = FermiOp(self.orbs, self.pFrom, self.pTo)
+        new_state.data = self.data + other.data
+        return new_state
+
+    def __sub__(self, other):
+        assert ((self.orbs == other.orbs) & (self.pFrom == other.pFrom) & (self.pTo == other.pTo))
+        new_state = FermiOp(self.orbs, self.pFrom, self.pTo)
+        new_state.data = self.data - other.data
+        return new_state
 
     def dagger(self):
         return FermiOp(self.orbs, self.pTo, self.pFrom, self.data.conj().T)
