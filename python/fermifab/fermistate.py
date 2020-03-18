@@ -5,7 +5,6 @@ from fermifab.fermiop import *
 __all__ = ['FermiState']
 
 class FermiState(object):
-    
     def __init__(self, orbs, N, data=None):
         """Construct a Fermi state
 
@@ -21,14 +20,21 @@ class FermiState(object):
                 State vector.
                 
         """
+        # Support for lists of orbs and N
+        # if not hasattr(orbs, '__len__'): (orbs,)
+        # if not hasattr(N, '__len__'): (N,)
+        # self.orbs = np.array(orbs)
+        # self.N = np.array(N)
         self.orbs = orbs
         self.N = N
+        assert np.all((self.orbs >= self.N) & (self.N >= 0))
         if data is not None:
             # TODO: support lists of 'orbs' and 'N'
-            assert len(data) == int(binom(orbs, N))
+            assert len(data) == int(np.prod(binom(orbs, N)))
             self.data = np.array(data)
         else:
-            self.data = np.zeros(int(binom(orbs, N)), dtype=complex)
+            self.data = np.zeros(int(np.prod(binom(orbs, N))), dtype=complex)
+            self.data[0] = 1.
 
     def __len__(self):
         return len(self.data)
