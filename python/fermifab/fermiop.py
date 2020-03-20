@@ -42,19 +42,19 @@ class FermiOp(object):
     # Operations with scalars
 
     def __mul__(self, other):
-        if type(other) in [float, int, complex]:
-            FermiOp(self.orbs, self.pFrom, self.pTo, data = other*self.data)
+        if isinstance(other, (float, complex, int)):
+            return FermiOp(self.orbs, self.pFrom, self.pTo, data = other*self.data)
         else:
             raise TypeError("Argument for multiplication must be numeric. For operator multiplication, use the matmul operator '@' instead.")
 
     def __rmul__(self, other):
-        if type(other) in [float, int, complex]:
-            FermiOp(self.orbs, self.pFrom, self.pTo, data = other*self.data)
+        if isinstance(other, (float, complex, int)):
+            return FermiOp(self.orbs, self.pFrom, self.pTo, data = other*self.data)
         else:
             raise TypeError("Argument for multiplication must be numeric. For operator multiplication, use the matmul operator '@' instead.")
 
     def __truediv__(self, other):
-        if type(other) in [float, int, complex]:
+        if isinstance(other, (float, complex, int)):
             return FermiOp(self.orbs,  self.pFrom, self.pTo, data = self.data / other)
         else:
             raise ValueError("Argument for division must be numeric.")

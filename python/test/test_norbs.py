@@ -1,8 +1,7 @@
 from scipy.special import binom
 import numpy as np
 import fermifab
-
-__all__ = ['test_norbs']
+import unittest
 
 def norbs(orbs, N):
     """norbs - 'natural orbitals': eigenstates of the 1-body RDM"""
@@ -25,12 +24,13 @@ def norbs(orbs, N):
     err = np.linalg.norm(np.diag(np.diag(G)) - G)
     return psi, err
 
-def test_norbs():
-    orbs = 6
-    N = 4
-    _, err = norbs(orbs, N)
-    np.testing.assert_almost_equal(err, 0)
+class TestNorbs(unittest.TestCase):
+    def test_norbs(self):
+        orbs = 6
+        N = 4
+        _, err = norbs(orbs, N)
+        self.assertAlmostEqual(err, 0)
 
 if __name__ == '__main__':
-    test_norbs()
+    unittest.main()
     

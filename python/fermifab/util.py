@@ -1,17 +1,38 @@
 import numpy as np
-from fermifab.fermiop import *
-from fermifab.fermistate import *
+import fermifab
 
-__all__ = ['crand','norm','comprise_config']
+__all__ = ['crand','norm','matrix_power','comprise_config']
 
-def crand(args):
+def crand(*args):
     return 0.5 - np.random.rand(*args) + 1j*(0.5 - np.random.rand(*args))
 
-def norm(FermiObj):
-    if type(FermiObj) in [FermiState,FermiOp]:
-        return float(np.linalg.norm(FermiObj.data))
+def norm(x):
+    if type(x) in [fermifab.FermiState,fermifab.FermiOp]:
+        return float(np.linalg.norm(x.data))
     else:
         return TypeError("Argument must be FermiState or FermiOp")
+
+def kron(x, y):
+    """ Kronecker tensor product of two Fermi operators """
+    if type(x) == type(y) == fermifab.FermiOp:
+        return fermifab.FermiOp([x.orbs, y.orbs], 
+                                [x.pFrom, y.pFrom],
+                                [x.pTo,   y.pTo],
+                                np.kron(x.data, y.data))
+
+    elif type(x) == type(y) == fermifab.FermiState:
+        return fermifab.FermiState([x.orbs, y.orbs],
+                                   [x.N,    y.N],
+                                   np.kron(x.data, y.data))
+    else:
+        raise TypeError("x and y must be both FermiOp or FermiState.")
+    
+
+def matrix_power(x, n):
+    """ Matrix power of a Fermi operator """
+    assert x.pFrom == x.pTo
+    data = np.linalg.matrix_power(x.data, n)
+    return fermifab.FermiOp(x.orbs, x.pFrom, x.pTo, data = data)
 
 def comprise_config(orbs1, orbs2, N1, N2):
     """Comprise configurations"""

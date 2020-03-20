@@ -1,6 +1,7 @@
 from scipy.special import binom
 import numpy as np
 import fermifab
+import unittest
 
 def tensor_op_err(orbs, p, N):
     """TENSOR_OP_TEST - Operator tensor product test"""
@@ -24,12 +25,13 @@ def tensor_op_err(orbs, p, N):
 
     return err
 
-def test_tensor_op():
-    orbs = 6
-    p = 2
-    N = 4
-    err = tensor_op_err(orbs, p, N)
-    np.testing.assert_almost_equal(err, 0)
+class TestTensorOp(unittest.TestCase):
+    def test_tensor_op(self):
+        orbs = 6
+        p = 2
+        N = 4
+        err = tensor_op_err(orbs, p, N)
+        self.assertAlmostEqual(err, 0)
 
 if __name__ == '__main__':
-    test_tensor_op()
+    unittest.main()

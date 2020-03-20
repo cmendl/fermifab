@@ -47,19 +47,19 @@ class FermiState(object):
     # Operations with scalars
 
     def __mul__(self, other):
-        if type(other) in [float, int, complex]:
+        if isinstance(other, (float, complex, int)):
             return FermiState(self.orbs, self.N, data = other*self.data)
         else:
             raise ValueError("Argument for multiplication must be numeric. For operator multiplication, use the matmul operator '@' instead.")
 
     def __rmul__(self, other):
-        if type(other) in [float, int, complex]:
+        if isinstance(other, (float, complex, int)):
             return FermiState(self.orbs, self.N, data = other*self.data)
         else:
             raise ValueError("Argument for multiplication must be numeric. For operator multiplication, use the matmul operator '@' instead.")
 
     def __truediv__(self, other):
-        if type(other) in [float, int, complex]:
+        if isinstance(other, (float, complex, int)):
             return FermiState(self.orbs, self.N, data = self.data / other)
         else:
             raise ValueError("Argument for division must be numeric.")
