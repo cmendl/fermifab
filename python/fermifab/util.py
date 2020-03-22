@@ -1,6 +1,7 @@
 import numpy as np
 import fermifab
 
+# TODO: Export kron when lists of orbs and N are implemented
 __all__ = ['crand','norm','matrix_power','comprise_config']
 
 def crand(*args):
