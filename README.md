@@ -1,7 +1,14 @@
 FermiFab toolbox for fermionic many-particle quantum systems
 ============================================================
 
-The FermiFab toolbox consists of a Matlab and Mathematica implementation, which are independent of each other but use the same principles and basically perform the same calculations. Both are supported by C interfaces (MEX and MathLink, respectively) to speed up computations and provide an additional abstraction layer.
+FermiFab is a quantum physics toolbox for small fermionic systems. It can represent fermionic many-body quantum states and calculate their reduced density matrices (RDMs). The toolbox transparently handles the inherent antisymmetrization of wavefunctions and incorporates the creation and annihilation formalism. FermiFab offers independent implementations in Python, Matlab and Mathematica, which are supported by C interfaces to speed up computations and provide an additional abstraction layer.
+
+Python
+------
+![](https://github.com/cmendl/fermifab/workflows/python_unittest/badge.svg)
+
+- Installation: run `python setup.py install --user` from the python/ subfolder (or `python3 ...` instead of `python ...`)
+- Documentation: [user guide](python/doc/user_guide.ipynb)
 
 Matlab
 ------
@@ -22,9 +29,8 @@ Mathematica
 
 License
 -------
-Copyright (c) 2008-2015, Christian B. Mendl  
+Copyright (c) 2008-2020, Ismael Medina Suárez and Christian B. Mendl  
 All rights reserved.  
-http://christian.mendl.net
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the Simplified BSD License  
