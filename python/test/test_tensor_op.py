@@ -20,8 +20,8 @@ def tensor_op_err(orbs, p, N):
     Up = fermifab.tensor_op(U, p)
     UN = fermifab.tensor_op(U, N)
 
-    err += np.linalg.norm((UN.T@UN).data - np.eye(*UN.shape))
-    err += np.linalg.norm((Up.T@fermifab.rdm(UN@psi,p)@Up- fermifab.rdm(psi,p)).data)
+    err += np.linalg.norm((UN.H@UN).data - np.eye(*UN.shape))
+    err += np.linalg.norm((Up.H@fermifab.rdm(UN@psi,p)@Up- fermifab.rdm(psi,p)).data)
 
     return err
 

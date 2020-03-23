@@ -17,7 +17,7 @@ def norbs(orbs, N):
 
     state = fermifab.FermiOp(orbs, 1, 1, data=U)
     stateN = fermifab.tensor_op(state, N)
-    psi = stateN.T @ psi
+    psi = stateN.H @ psi
 
     G = fermifab.rdm(psi,1).data
 

@@ -111,6 +111,6 @@ class FermiState(object):
         return FermiOp(self.orbs, self.N, 0, self.data.conj().reshape((1, -1)))
     
     @property
-    def T(self):
+    def H(self):
         return self.dagger()
 

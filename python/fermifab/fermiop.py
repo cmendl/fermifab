@@ -93,5 +93,5 @@ class FermiOp(object):
         return FermiOp(self.orbs, self.pTo, self.pFrom, self.data.conj().T)
     
     @property
-    def T(self):
+    def H(self):
         return self.dagger()

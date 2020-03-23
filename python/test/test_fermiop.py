@@ -31,10 +31,10 @@ class TestFermiOp(unittest.TestCase):
         data = fermifab.crand(int(binom(orbs, N)))
         psi = fermifab.FermiState(orbs, N, data = data)
         psi = psi/fermifab.norm(psi)
-        rho = psi @ psi.T
+        rho = psi @ psi.H
 
         
-        self.assertAlmostEqual((psi.T @ psi),1)
+        self.assertAlmostEqual((psi.H @ psi),1)
 
         err = np.linalg.norm((rho @ psi).data - psi.data)
         self.assertAlmostEqual(err, 0)
