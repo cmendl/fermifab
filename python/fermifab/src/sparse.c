@@ -34,6 +34,17 @@ void DeleteSparseArray(sparse_array_t *a)
 }
 
 
+void DeleteSparseComplexArray(sparse_complex_array_t *a)
+{
+	if (a->dims != NULL) {  free(a->dims); }
+	if (a->ind  != NULL) {  free(a->ind);  }
+	if (a->val  != NULL) {  free(a->val);  }
+
+	a->nnz  = 0;
+	a->rank = 0;
+}
+
+
 //________________________________________________________________________________________________________________________
 ///
 /// \brief Convert tensor index to data offset (row major ordering)
@@ -60,6 +71,22 @@ static inline int IndexToOffset(const int rank, const int *dims, const int *ind)
 void SparseToDense(const sparse_array_t *a, double *dns)
 {
 	memset(dns, 0, IntegerProduct(a->dims, a->rank) * sizeof(double));
+
+	int i;
+	for (i = 0; i < a->nnz; i++)
+	{
+		dns[IndexToOffset(a->rank, a->dims, &a->ind[a->rank*i])] = a->val[i];
+	}
+}
+
+
+//________________________________________________________________________________________________________________________
+///
+/// \brief Convert a sparse to a dense array, assuming that memory for target array has been allocated
+///
+void SparseComplexToDense(const sparse_complex_array_t *a, double complex *dns)
+{
+	memset(dns, 0, IntegerProduct(a->dims, a->rank) * sizeof(double complex));
 
 	int i;
 	for (i = 0; i < a->nnz; i++)

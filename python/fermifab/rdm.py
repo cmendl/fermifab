@@ -43,7 +43,7 @@ def rdm(state, p):
         numpy.ndarray: reduced density matrix
     """
     K = construct_rdm_kernel(state.orbs, p, state.N, state.N)
-    G = np.zeros((len(K), len(K[0])), dtype=complex)
+    G = np.zeros((len(K), len(K[0])), dtype=state.data.dtype)
     for i in range(G.shape[0]):
         for j in range(G.shape[1]):
             G[i, j] = np.vdot(state.data, K[i][j].dot(state.data))

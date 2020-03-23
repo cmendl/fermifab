@@ -24,5 +24,9 @@
 
 double Det(const int n, double *A);
 
+double complex ComplexDet(const int n, double complex *A);
+
 
 int TensorOp(const int orbs, const int N, const double *A, sparse_array_t *AN);
+
+int TensorOpComplex(const int orbs, const int N, const double complex *A, sparse_complex_array_t *AN);

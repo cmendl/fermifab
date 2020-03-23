@@ -26,6 +26,23 @@ static inline double UniformDistance(const int n, const double *x, const double 
 
 
 //________________________________________________________________________________________________________________________
+///
+/// \brief Uniform distance (infinity norm) between 'x' and 'y'
+///
+static inline double UniformDistanceComplex(const int n, const double complex *x, const double complex *y)
+{
+	double d = 0;
+	int i;
+	for (i = 0; i < n; i++)
+	{
+		d = fmax(d, cabs(x[i] - y[i]));
+	}
+
+	return d;
+}
+
+
+//________________________________________________________________________________________________________________________
 //
 
 
@@ -42,7 +59,11 @@ int TestTensorOp(void)
 	status = ReadData("../test/test_tensor_op_A.dat", A, sizeof(double), orbs*orbs);
 	if (status < 0) { return status; }
 
-	// determinant
+	double complex *B = (double complex *)malloc(orbs*orbs * sizeof(double complex));
+	status = ReadData("../test/test_tensor_op_B.dat", B, sizeof(double complex), orbs*orbs);
+	if (status < 0) { return status; }
+
+	// determinant of a real matrix
 	{
 		// copy 'A' since determinant function overwrites it
 		double *Acopy = (double *)malloc(orbs*orbs * sizeof(double));
@@ -60,7 +81,25 @@ int TestTensorOp(void)
 		err += fabs(d - d_ref) / fabs(d_ref);
 	}
 
-	// tensor product
+	// determinant of a complex matrix
+	{
+		// copy 'B' since determinant function overwrites it
+		double complex *Bcopy = (double complex *)malloc(orbs*orbs * sizeof(double complex));
+		memcpy(Bcopy, B, orbs*orbs * sizeof(double complex));
+
+		double complex d = ComplexDet(orbs, Bcopy);
+
+		free(Bcopy);
+
+		// load reference determinant from disk
+		double complex d_ref = 0;
+		status = ReadData("../test/test_tensor_op_detB.dat", &d_ref, sizeof(double complex), 1);
+		if (status < 0) { return status; }
+
+		err += cabs(d - d_ref) / cabs(d_ref);
+	}
+
+	// tensor product of a real matrix
 	{
 		const int N = 4;
 
@@ -87,7 +126,35 @@ int TestTensorOp(void)
 		DeleteSparseArray(&AN);
 	}
 
+	// tensor product of a complex matrix
+	{
+		const int N = 4;
+
+		sparse_complex_array_t BN = { 0 };
+		status = TensorOpComplex(orbs, N, B, &BN);
+		if (status < 0) { return status; }
+
+		const int nelem = IntegerProduct(BN.dims, BN.rank);
+
+		double complex *BNd = (double complex *)malloc(nelem * sizeof(double complex));
+		if (BNd == NULL) { return -1; }
+		SparseComplexToDense(&BN, BNd);
+
+		// load reference matrix from disk
+		double complex *BN_ref = (double complex *)malloc(nelem * sizeof(double complex));
+		if (BN_ref == NULL) { return -1; }
+		status = ReadData("../test/test_tensor_op_BN.dat", BN_ref, sizeof(double complex), nelem);
+		if (status < 0) { return status; }
+
+		err += UniformDistanceComplex(nelem, BNd, BN_ref);
+
+		free(BN_ref);
+		free(BNd);
+		DeleteSparseComplexArray(&BN);
+	}
+
 	// clean up
+	free(B);
 	free(A);
 
 	return (err < 1e-12 ? 0 : 1);

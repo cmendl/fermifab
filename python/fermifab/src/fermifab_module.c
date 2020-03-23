@@ -4,6 +4,7 @@
 #include <numpy/arrayobject.h>
 #include "generate_rdm.h"
 #include "tensor_op.h"
+#include <stdbool.h>
 #include <inttypes.h>
 
 
@@ -267,6 +268,9 @@ static PyObject *gen_rdm(PyObject *self, PyObject *args)
 
 static PyObject *tensor_op(PyObject *self, PyObject *args)
 {
+	// suppress "unused parameter" warning
+	(void)self;
+
 	PyObject *Ain;
 	int N;
 	if (!PyArg_ParseTuple(args, "Oi", &Ain, &N)) {
@@ -279,69 +283,164 @@ static PyObject *tensor_op(PyObject *self, PyObject *args)
 		return NULL;
 	}
 
-	PyArrayObject *A = (PyArrayObject *)PyArray_ContiguousFromObject(Ain, NPY_DOUBLE, 2, 2);
-	if (A == NULL) {
-		PyErr_SetString(PyExc_ValueError, "cannot interpret 'A' as matrix");
-		return NULL;
-	}
-
-	if (PyArray_DIM(A, 0) != PyArray_DIM(A, 1))
+	// find out if we should aim for a real or complex matrix
+	bool use_complex;
 	{
-		PyErr_SetString(PyExc_ValueError, "'A' must be a square matrix");
+		PyArrayObject *arr = NULL;
+		PyArray_Descr *dtype = NULL;
+		int ndim = 0;
+		npy_intp dims[NPY_MAXDIMS];
+		if (PyArray_GetArrayParamsFromObject(Ain, /*requested_dtype*/NULL, /*writeable*/false, &dtype, &ndim, dims, &arr, NULL) < 0)
+		{
+			PyErr_SetString(PyExc_SyntaxError, "cannot get array parameters of 'A'; syntax: tensor_op(A, N)");
+			return NULL;
+		}
+		if (arr == NULL)
+		{
+			PyErr_SetString(PyExc_SyntaxError, "cannot interpret 'A' as array; syntax: tensor_op(A, N)");
+			return NULL;
+		}
+
+		PyArray_Descr *desc = PyArray_DESCR(arr);
+		use_complex = (desc->kind == 'c');
+
+		Py_DECREF(arr);
+	}
+
+	if (!use_complex)
+	{
+		PyArrayObject *A = (PyArrayObject *)PyArray_ContiguousFromObject(Ain, NPY_DOUBLE, 2, 2);
+		if (A == NULL)
+		{
+			PyErr_SetString(PyExc_ValueError, "cannot interpret 'A' as real matrix");
+			return NULL;
+		}
+
+		if (PyArray_DIM(A, 0) != PyArray_DIM(A, 1))
+		{
+			PyErr_SetString(PyExc_ValueError, "'A' must be a square matrix");
+			Py_DECREF(A);
+			return NULL;
+		}
+
+		const int orbs = PyArray_DIM(A, 0);
+
+		if (N > orbs) {
+			PyErr_SetString(PyExc_ValueError, "'N' cannot be larger than number of orbitals; syntax: tensor_op(A, N)");
+			Py_DECREF(A);
+			return NULL;
+		}
+
+		sparse_array_t AN = { 0 };
+		int status = TensorOp(orbs, N, PyArray_DATA(A), &AN);
+		if (status < 0) {
+			PyErr_SetString(PyExc_RuntimeError, "internal error occurred, probably out of memory");
+			DeleteSparseArray(&AN);
+			Py_DECREF(A);
+			return NULL;
+		}
+
 		Py_DECREF(A);
-		return NULL;
+
+		// dimensions
+		assert(AN.rank == 2);
+		PyObject *dims_obj = Py_BuildValue("(ii)", AN.dims[0], AN.dims[1]);
+
+		// construct array of values
+		npy_intp dims_val[1] = { AN.nnz };
+		PyArrayObject *val_arr = (PyArrayObject *)PyArray_SimpleNew(1, dims_val, NPY_DOUBLE);
+		if (val_arr == NULL) {
+			PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned value vector");
+			Py_DECREF(dims_obj);
+			DeleteSparseArray(&AN);
+			return NULL;
+		}
+		memcpy(PyArray_DATA(val_arr), AN.val, AN.nnz * sizeof(double));
+
+		// construct array of indices
+		npy_intp dims_ind[2] = { AN.nnz, AN.rank };
+		PyArrayObject *ind_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims_ind, sizeof(AN.ind[0]) == 4 ? NPY_INT32 : NPY_INT64);
+		if (ind_arr == NULL) {
+			PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned array of indices");
+			Py_DECREF(dims_obj);
+			Py_DECREF(val_arr);
+			DeleteSparseArray(&AN);
+			return NULL;
+		}
+		memcpy(PyArray_DATA(ind_arr), AN.ind, AN.nnz*AN.rank * sizeof(AN.ind[0]));
+
+		// clean up
+		DeleteSparseArray(&AN);
+
+		return Py_BuildValue("(OOO)", dims_obj, val_arr, ind_arr);
 	}
+	else // complex-valued input matrix
+	{
+		PyArrayObject *A = (PyArrayObject *)PyArray_ContiguousFromObject(Ain, NPY_CDOUBLE, 2, 2);
+		if (A == NULL)
+		{
+			PyErr_SetString(PyExc_ValueError, "cannot interpret 'A' as complex matrix");
+			return NULL;
+		}
 
-	const int orbs = PyArray_DIM(A, 0);
+		if (PyArray_DIM(A, 0) != PyArray_DIM(A, 1))
+		{
+			PyErr_SetString(PyExc_ValueError, "'A' must be a square matrix");
+			Py_DECREF(A);
+			return NULL;
+		}
 
-	if (N > orbs) {
-		PyErr_SetString(PyExc_ValueError, "'N' cannot be larger than number of orbitals; syntax: tensor_op(A, N)");
+		const int orbs = PyArray_DIM(A, 0);
+
+		if (N > orbs) {
+			PyErr_SetString(PyExc_ValueError, "'N' cannot be larger than number of orbitals; syntax: tensor_op(A, N)");
+			Py_DECREF(A);
+			return NULL;
+		}
+
+		sparse_complex_array_t AN = { 0 };
+		int status = TensorOpComplex(orbs, N, PyArray_DATA(A), &AN);
+		if (status < 0) {
+			PyErr_SetString(PyExc_RuntimeError, "internal error occurred, probably out of memory");
+			DeleteSparseComplexArray(&AN);
+			Py_DECREF(A);
+			return NULL;
+		}
+
 		Py_DECREF(A);
-		return NULL;
+
+		// dimensions
+		assert(AN.rank == 2);
+		PyObject *dims_obj = Py_BuildValue("(ii)", AN.dims[0], AN.dims[1]);
+
+		// construct array of values
+		npy_intp dims_val[1] = { AN.nnz };
+		PyArrayObject *val_arr = (PyArrayObject *)PyArray_SimpleNew(1, dims_val, NPY_CDOUBLE);
+		if (val_arr == NULL) {
+			PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned value vector");
+			Py_DECREF(dims_obj);
+			DeleteSparseComplexArray(&AN);
+			return NULL;
+		}
+		memcpy(PyArray_DATA(val_arr), AN.val, AN.nnz * sizeof(double complex));
+
+		// construct array of indices
+		npy_intp dims_ind[2] = { AN.nnz, AN.rank };
+		PyArrayObject *ind_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims_ind, sizeof(AN.ind[0]) == 4 ? NPY_INT32 : NPY_INT64);
+		if (ind_arr == NULL) {
+			PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned array of indices");
+			Py_DECREF(dims_obj);
+			Py_DECREF(val_arr);
+			DeleteSparseComplexArray(&AN);
+			return NULL;
+		}
+		memcpy(PyArray_DATA(ind_arr), AN.ind, AN.nnz*AN.rank * sizeof(AN.ind[0]));
+
+		// clean up
+		DeleteSparseComplexArray(&AN);
+
+		return Py_BuildValue("(OOO)", dims_obj, val_arr, ind_arr);
 	}
-
-	sparse_array_t AN = { 0 };
-	int status = TensorOp(orbs, N, PyArray_DATA(A), &AN);
-	if (status < 0) {
-		PyErr_SetString(PyExc_RuntimeError, "internal error occurred, probably out of memory");
-		DeleteSparseArray(&AN);
-		Py_DECREF(A);
-		return NULL;
-	}
-
-	Py_DECREF(A);
-
-	// dimensions
-	assert(AN.rank == 2);
-	PyObject *dims_obj = Py_BuildValue("(ii)", AN.dims[0], AN.dims[1]);
-
-	// construct array of values
-	npy_intp dims_val[1] = { AN.nnz };
-	PyArrayObject *val_arr = (PyArrayObject *)PyArray_SimpleNew(1, dims_val, NPY_DOUBLE);
-	if (val_arr == NULL) {
-		PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned value vector");
-		Py_DECREF(dims_obj);
-		DeleteSparseArray(&AN);
-		return NULL;
-	}
-	memcpy(PyArray_DATA(val_arr), AN.val, AN.nnz * sizeof(double));
-
-	// construct array of indices
-	npy_intp dims_ind[2] = { AN.nnz, AN.rank };
-	PyArrayObject *ind_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims_ind, sizeof(AN.ind[0]) == 4 ? NPY_INT32 : NPY_INT64);
-	if (ind_arr == NULL) {
-		PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned array of indices");
-		Py_DECREF(dims_obj);
-		Py_DECREF(val_arr);
-		DeleteSparseArray(&AN);
-		return NULL;
-	}
-	memcpy(PyArray_DATA(ind_arr), AN.ind, AN.nnz*AN.rank * sizeof(AN.ind[0]));
-
-	// clean up
-	DeleteSparseArray(&AN);
-
-	return Py_BuildValue("(OOO)", dims_obj, val_arr, ind_arr);
 }
 
 
