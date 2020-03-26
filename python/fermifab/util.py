@@ -2,7 +2,7 @@ import numpy as np
 import fermifab
 
 # TODO: Export kron when lists of orbs and N are implemented
-__all__ = ['crand','norm','matrix_power','comprise_config']
+__all__ = ['crand','norm','trace','matrix_power','comprise_config', 'eig']
 
 def crand(*args):
     return 0.5 - np.random.rand(*args) + 1j*(0.5 - np.random.rand(*args))
@@ -34,6 +34,17 @@ def matrix_power(x, n):
     assert x.pFrom == x.pTo
     data = np.linalg.matrix_power(x.data, n)
     return fermifab.FermiOp(x.orbs, x.pFrom, x.pTo, data = data)
+
+def eig(a):
+    """Eigenvalues and eigenstates of Fermi operators"""
+    assert type(a) == fermifab.FermiOp
+    D, U = np.linalg.eig(a.data)
+    return D, fermifab.FermiOp(a.orbs, a.pFrom, a.pTo, U)
+
+def trace(a):
+    """ Trace of a FermiOp"""
+    assert a.pFrom == a.pTo
+    return np.trace(a.data)
 
 def comprise_config(orbs1, orbs2, N1, N2):
     """Comprise configurations"""

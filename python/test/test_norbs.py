@@ -18,8 +18,8 @@ class TestNorbs(unittest.TestCase):
         rho = fermifab.rdm(psi, 1)
 
         # diagonalize rho and construct base change matrix operating on N-fold tensor product
-        _, U = np.linalg.eig(rho.data)
-        UN = fermifab.tensor_op(fermifab.FermiOp(orbs, 1, 1, data=U), N)
+        _, U = fermifab.eig(rho)
+        UN = fermifab.tensor_op(U, N)
         # apply inverse base change matrix to psi
         psi = UN.H @ psi
 
