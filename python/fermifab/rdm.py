@@ -3,7 +3,7 @@ import numpy as np
 from scipy.sparse import csr_matrix
 from fermifab.fermiop import FermiOp
 
-__all__ = ['rdm']
+__all__ = ['rdm','p2N']
 
 
 def construct_rdm_kernel(orbs, p1, N1, N2):
@@ -48,3 +48,25 @@ def rdm(state, p):
         for j in range(G.shape[1]):
             G[i, j] = np.vdot(state.data, K[i][j].dot(state.data))
     return FermiOp(state.orbs, p, p, data=G)
+
+def p2N(h, N):
+    """Calculate N-body from p-body operator,
+      H = sum_ij h_ij a^dagger_i a_j"""
+
+    assert type(h) == FermiOp
+    # TODO: add support for lists of N and orbs
+    assert (h.pFrom == h.pTo)
+    
+    # kernel matrices for current configuration
+    K = construct_rdm_kernel(h.orbs, h.pFrom, N, N)
+    dimsK = (len(K), len(K[0]))
+    A = h.data
+
+    # TODO: optimize for sparse h
+    H = np.zeros(K[0][0].shape)
+
+    for j in range(dimsK[0]):
+        for k in range(dimsK[1]):
+            H += A[j,k]*K[k][j]
+    
+    return FermiOp(h.orbs, N, N, H)
