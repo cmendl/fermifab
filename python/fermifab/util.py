@@ -1,8 +1,9 @@
 import numpy as np
 import fermifab
+from scipy.sparse import issparse
 
 # TODO: Export kron when lists of orbs and N are implemented
-__all__ = ['crand','norm','trace','matrix_power','comprise_config', 'eig']
+__all__ = ['crand','norm','trace','trace_prod','matrix_power','comprise_config', 'eig']
 
 def crand(*args):
     return 0.5 - np.random.rand(*args) + 1j*(0.5 - np.random.rand(*args))
@@ -45,6 +46,13 @@ def trace(a):
     """ Trace of a FermiOp"""
     assert a.pFrom == a.pTo
     return np.trace(a.data)
+
+def trace_prod(A, B):
+    """Calculate trace(A*B) efficiently"""
+    if issparse(A) or issparse(B):
+        return np.trace(A@B)
+    else:
+        return sum(A[j,:] @ B[:,j] for j in range(A.shape[0]))
 
 def comprise_config(orbs1, orbs2, N1, N2):
     """Comprise configurations"""
