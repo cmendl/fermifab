@@ -4,7 +4,7 @@ import fermifab
 import unittest
 
 
-class TestNorbs(unittest.TestCase):
+class TestP2N(unittest.TestCase):
     def _p2N_err(self, orbs, p, N):
         shape_data = int(binom(orbs, p)), int(binom(orbs, p))
         h = fermifab.FermiOp(orbs, p, p, fermifab.crand(*shape_data))
@@ -15,7 +15,7 @@ class TestNorbs(unittest.TestCase):
         err = abs(psi.H@fermifab.p2N(h, N)@psi - fermifab.trace(h@fermifab.rdm(psi, p)))
         return err
     
-    def test_norbs(self):
+    def test_p2N(self):
         err = self._p2N_err(6, 2, 4)
         self.assertAlmostEqual(err, 0)
 
