@@ -114,3 +114,6 @@ class FermiState(object):
     def H(self):
         return self.dagger()
 
+    def copy(self):
+        return FermiState(self.orbs, self.N, self.data)
+

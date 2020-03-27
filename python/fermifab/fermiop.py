@@ -95,3 +95,6 @@ class FermiOp(object):
     @property
     def H(self):
         return self.dagger()
+
+    def copy(self):
+        return FermiOp(self.orbs, self.pFrom, self.pTo, self.data)
