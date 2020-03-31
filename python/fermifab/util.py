@@ -3,7 +3,7 @@ import fermifab
 from scipy.sparse import issparse
 
 # TODO: Export kron when lists of orbs and N are implemented
-__all__ = ['crand','norm','trace','trace_prod','matrix_power','comprise_config', 'eig']
+__all__ = ['crand','norm','trace','trace_prod','matrix_power','comprise_config', 'eig','fermi2coords']
 
 def crand(*args):
     return 0.5 - np.random.rand(*args) + 1j*(0.5 - np.random.rand(*args))
@@ -53,6 +53,23 @@ def trace_prod(A, B):
         return np.trace(A@B)
     else:
         return sum(A[j,:] @ B[:,j] for j in range(A.shape[0]))
+
+
+def fermi2coords_generator(orbs, N):
+    """ Enumerate all N-particle Slater basis states for 'orbs' available orbitals (recursive generator)"""
+    if N > 1:
+        for i in range(N-1, orbs):
+            inner_gen = fermi2coords_generator(i, N-1)
+            for L in inner_gen:
+                L.append(i)
+                yield L
+    if N == 1:
+        for i in range(0, orbs):
+            yield [i]
+
+def fermi2coords(orbs, N):
+    """ Enumerate all N-particle Slater basis states for 'orbs' available orbitals"""
+    return np.array(list(fermi2coords_generator(orbs, N))).T
 
 def comprise_config(orbs1, orbs2, N1, N2):
     """Comprise configurations"""
