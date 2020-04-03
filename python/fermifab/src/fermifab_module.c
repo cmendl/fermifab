@@ -2,10 +2,167 @@
 #include <Python.h>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
+#include "fermi_map.h"
 #include "generate_rdm.h"
 #include "tensor_op.h"
 #include <stdbool.h>
 #include <inttypes.h>
+
+
+//________________________________________________________________________________________________________________________
+//
+
+
+static PyObject *fermi2coords(PyObject *self, PyObject *args)
+{
+	// suppress "unused parameter" warning
+	(void)self;
+
+	PyObject *obj_orbs;     // list of number of orbitals
+	PyObject *obj_N;        // particle numbers
+
+	if (!PyArg_ParseTuple(args, "OO", &obj_orbs, &obj_N)) {
+		PyErr_SetString(PyExc_SyntaxError, "error parsing input; syntax: fermi2coords(orbs, N)");
+		return NULL;
+	}
+
+	int _orbs[64] = { 0 };
+	int _N[64]    = { 0 };
+	fermi_config_t config = {
+		.orbs = _orbs,
+		.N = _N,
+		.nc = 0
+	};
+
+	// 'orbs'
+	{
+		PyObject *iterator = PyObject_GetIter(obj_orbs);
+		if (iterator == NULL)
+		{
+			PyErr_SetString(PyExc_SyntaxError, "error parsing input: cannot iterate over 'orbs' argument; syntax: fermi2coords(orbs, N)");
+			return NULL;
+		}
+
+		PyObject *item;
+		while ((item = PyIter_Next(iterator)))
+		{
+			long n = PyLong_AsLong(item);
+			if (PyErr_Occurred()) {
+				PyErr_SetString(PyExc_SyntaxError, "error parsing input: cannot interpret 'orbs' item as integer; syntax: fermi2coords(orbs, N)");
+				Py_DECREF(item);
+				Py_DECREF(iterator);
+				return NULL;
+			}
+			Py_DECREF(item);
+
+			if (n <= 0) {
+				PyErr_SetString(PyExc_ValueError, "entries in 'orbs' argument must be positive; syntax: fermi2coords(orbs, N)");
+				Py_DECREF(iterator);
+				return NULL;
+			}
+			else if (config.nc == 64) {
+				PyErr_SetString(PyExc_ValueError, "too many entries in 'orbs' argument; syntax: fermi2coords(orbs, N)");
+				Py_DECREF(iterator);
+				return NULL;
+			}
+
+			config.orbs[config.nc] = (int)n;
+			config.nc++;
+		}
+
+		Py_DECREF(iterator);
+	}
+
+	// 'N'
+	{
+		int count = 0;
+
+		PyObject *iterator = PyObject_GetIter(obj_N);
+		if (iterator == NULL)
+		{
+			PyErr_SetString(PyExc_SyntaxError, "error parsing input: cannot iterate over 'N' argument; syntax: fermi2coords(orbs, N)");
+			return NULL;
+		}
+
+		PyObject *item;
+		while ((item = PyIter_Next(iterator)))
+		{
+			long n = PyLong_AsLong(item);
+			if (PyErr_Occurred()) {
+				PyErr_SetString(PyExc_SyntaxError, "error parsing input: cannot interpret 'N' item as integer; syntax: fermi2coords(orbs, N)");
+				Py_DECREF(item);
+				Py_DECREF(iterator);
+				return NULL;
+			}
+			Py_DECREF(item);
+
+			if (n < 0) {
+				PyErr_SetString(PyExc_ValueError, "entries in 'N' argument must be non-negative; syntax: fermi2coords(orbs, N)");
+				Py_DECREF(iterator);
+				return NULL;
+			}
+			else if (count == 64) {
+				PyErr_SetString(PyExc_ValueError, "too many entries in 'N' argument; syntax: fermi2coords(orbs, N)");
+				Py_DECREF(iterator);
+				return NULL;
+			}
+
+			config.N[count] = (int)n;
+			count++;
+		}
+
+		Py_DECREF(iterator);
+
+		if (count != config.nc) {
+			PyErr_SetString(PyExc_SyntaxError, "number of items in 'orbs' and 'N' must be the same; syntax: fermi2coords(orbs, N)");
+			return NULL;
+		}
+	}
+	int Ntot = IntegerSum(config.N, config.nc);
+
+	int i;
+	for (i = 0; i < config.nc; i++)
+	{
+		if (config.N[i] > config.orbs[i]) {
+			PyErr_SetString(PyExc_ValueError, "particle number cannot be larger than the corresponding number of orbitals; syntax: fermi2coords(orbs, N)");
+			return NULL;
+		}
+	}
+
+	fermi_map_t baseMap;
+	int status = FermiMap(&config, &baseMap);
+	if (status < 0) {
+		PyErr_SetString(PyExc_RuntimeError, "internal error occurred, probably out of memory");
+		return NULL;
+	}
+	fermi_coords_t *x = (fermi_coords_t *)malloc(Ntot*sizeof(fermi_coords_t));
+
+	npy_intp dims[2] = { baseMap.num, Ntot };
+	PyArrayObject *coords_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, NPY_INT);
+	if (coords_arr == NULL) {
+		PyErr_SetString(PyExc_RuntimeError, "error creating to-be-returned matrix of coordinates");
+		return NULL;
+	}
+
+	int *coords = (int *)PyArray_DATA(coords_arr);
+	for (i = 0; i < baseMap.num; i++)
+	{
+		// get coordinates
+		FermiDecode(baseMap.map[i], x, Ntot);
+
+		int j;
+		for (j = 0; j < Ntot; j++)
+		{
+			coords[i*Ntot + j] = x[j];
+		}
+	}
+
+	// clean up
+	free(x);
+	free(baseMap.map);
+
+	return (PyObject *)coords_arr;
+}
 
 
 //________________________________________________________________________________________________________________________
@@ -449,8 +606,9 @@ static PyObject *tensor_op(PyObject *self, PyObject *args)
 
 
 static PyMethodDef methods[] = {
-	{ "gen_rdm",   gen_rdm,   METH_VARARGS, "Generate sparse kernel tensor for computing reduced density matrices." },
-	{ "tensor_op", tensor_op, METH_VARARGS, "Matrix representation of the N-fold tensor product of an operator." },
+	{ "fermi2coords", fermi2coords, METH_VARARGS, "Enumerate all N-particle Slater basis states for 'orbs' available orbitals." },
+	{ "gen_rdm",      gen_rdm,      METH_VARARGS, "Generate sparse kernel tensor for computing reduced density matrices." },
+	{ "tensor_op",    tensor_op,    METH_VARARGS, "Matrix representation of the N-fold tensor product of an operator." },
 	{ NULL, NULL, 0, NULL }     // sentinel
 };
 

@@ -1,78 +1,64 @@
 import numpy as np
-import fermifab
 from scipy.sparse import issparse
+from .fermistate import FermiState
+from .fermiop import FermiOp
+
 
 # TODO: Export kron when lists of orbs and N are implemented
-__all__ = ['crand','norm','trace','trace_prod','matrix_power','comprise_config', 'eig','fermi2coords']
+__all__ = ['crand', 'norm', 'trace', 'trace_prod', 'matrix_power', 'comprise_config', 'eig']
 
 def crand(*args):
     return 0.5 - np.random.rand(*args) + 1j*(0.5 - np.random.rand(*args))
 
 def norm(x):
-    if type(x) in [fermifab.FermiState,fermifab.FermiOp]:
+    if type(x) in [FermiState, FermiOp]:
         return float(np.linalg.norm(x.data))
     else:
         return TypeError("Argument must be FermiState or FermiOp")
 
 def kron(x, y):
-    """ Kronecker tensor product of two Fermi operators """
-    if type(x) == type(y) == fermifab.FermiOp:
-        return fermifab.FermiOp([x.orbs, y.orbs], 
-                                [x.pFrom, y.pFrom],
-                                [x.pTo,   y.pTo],
-                                np.kron(x.data, y.data))
+    """Kronecker tensor product of two Fermi operators"""
+    if type(x) == type(y) == FermiOp:
+        return FermiOp([x.orbs, y.orbs],
+                       [x.pFrom, y.pFrom],
+                       [x.pTo,   y.pTo],
+                       np.kron(x.data, y.data))
 
-    elif type(x) == type(y) == fermifab.FermiState:
-        return fermifab.FermiState([x.orbs, y.orbs],
+    elif type(x) == type(y) == FermiState:
+        return FermiState([x.orbs, y.orbs],
                                    [x.N,    y.N],
                                    np.kron(x.data, y.data))
     else:
         raise TypeError("x and y must be both FermiOp or FermiState.")
-    
+
 
 def matrix_power(x, n):
-    """ Matrix power of a Fermi operator """
+    """Matrix power of a Fermi operator"""
     assert x.pFrom == x.pTo
     data = np.linalg.matrix_power(x.data, n)
-    return fermifab.FermiOp(x.orbs, x.pFrom, x.pTo, data = data)
+    return FermiOp(x.orbs, x.pFrom, x.pTo, data = data)
 
 def eig(a):
     """Eigenvalues and eigenstates of Fermi operators"""
-    assert type(a) == fermifab.FermiOp
+    assert type(a) == FermiOp
     D, U = np.linalg.eig(a.data)
-    return D, fermifab.FermiOp(a.orbs, a.pFrom, a.pTo, U)
+    return D, FermiOp(a.orbs, a.pFrom, a.pTo, U)
 
 def trace(a):
-    """ Trace of a FermiOp"""
+    """Trace of a FermiOp"""
     assert a.pFrom == a.pTo
     return np.trace(a.data)
 
 def trace_prod(A, B):
-    """Calculate trace(A*B) efficiently"""
+    """Calculate trace(A*B) efficiently."""
     if issparse(A) or issparse(B):
         return np.trace(A@B)
     else:
         return sum(A[j,:] @ B[:,j] for j in range(A.shape[0]))
 
 
-def fermi2coords_generator(orbs, N):
-    """ Enumerate all N-particle Slater basis states for 'orbs' available orbitals (recursive generator)"""
-    if N > 1:
-        for i in range(N-1, orbs):
-            inner_gen = fermi2coords_generator(i, N-1)
-            for L in inner_gen:
-                L.append(i)
-                yield L
-    if N == 1:
-        for i in range(0, orbs):
-            yield [i]
-
-def fermi2coords(orbs, N):
-    """ Enumerate all N-particle Slater basis states for 'orbs' available orbitals"""
-    return np.array(list(fermi2coords_generator(orbs, N))).T
-
 def comprise_config(orbs1, orbs2, N1, N2):
-    """Comprise configurations"""
+    """Comprise configurations."""
 
     assert (sum(orbs1) == sum(orbs2)) & (sum(N1) == sum(N2))
     assert np.all(orbs1 > 0) & np.all(orbs2>0)
