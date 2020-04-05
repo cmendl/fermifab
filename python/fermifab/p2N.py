@@ -8,14 +8,14 @@ __all__ = ['p2N']
 def p2N(h, N):
     """
     Calculate N-body from p-body operator:
-    H = sum_ij h_ij a^dagger_i a_j
+    :math:`H = \sum_{ij} h_{ij} \, a^\dagger_i a_j`
 
     Args:
         h: p-body operator
         N: target particle number
 
     Returns:
-        FermiOp: N-body operator generated from h
+        FermiOp: N-body operator generated from `h`
     """
     assert type(h) == FermiOp
     assert not (np.array(h.pFrom) - np.array(h.pTo)).any()

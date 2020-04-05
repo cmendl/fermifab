@@ -1,9 +1,11 @@
-from fermifab.kernel import gen_rdm
 import numpy as np
 from scipy.sparse import csr_matrix
-import fermifab
+from .fermistate import FermiState
+from .fermiop import FermiOp
+from .util import trace_prod
+from fermifab.kernel import gen_rdm
 
-__all__ = ['rdm','p2N']
+__all__ = ['rdm']
 
 
 def construct_rdm_kernel(orbs, p1, N1, N2):
@@ -42,10 +44,10 @@ def rdm(state, p):
     Returns:
         numpy.ndarray: reduced density matrix
     """
-    if type(state) == fermifab.FermiState:
+    if type(state) == FermiState:
         N1 = state.N
         N2 = N1
-    elif type(state) == fermifab.FermiOp:
+    elif type(state) == FermiOp:
         N1 = state.pFrom
         N2 = state.pTo
         # TODO: add support for lists of N
@@ -55,32 +57,9 @@ def rdm(state, p):
     G = np.zeros((len(K), len(K[0])), dtype=state.data.dtype)
     for i in range(G.shape[0]):
         for j in range(G.shape[1]):
-            if type(state) == fermifab.FermiState:
+            if type(state) == FermiState:
                 G[i, j] = np.vdot(state.data, K[i][j].dot(state.data))
             else:
-                # TODO: replace for fermifab.traceprod
-                G[i, j] = fermifab.trace_prod(K[i][j], state.data)
-    
-    return fermifab.FermiOp(state.orbs, p, p, data=G)
+                G[i, j] = trace_prod(K[i][j], state.data)
 
-def p2N(h, N):
-    """Calculate N-body from p-body operator,
-      H = sum_ij h_ij a^dagger_i a_j"""
-
-    assert type(h) == fermifab.FermiOp
-    # TODO: add support for lists of N and orbs
-    assert (h.pFrom == h.pTo)
-    
-    # kernel matrices for current configuration
-    K = construct_rdm_kernel(h.orbs, h.pFrom, N, N)
-    dimsK = (len(K), len(K[0]))
-    A = h.data
-
-    # TODO: optimize for sparse h
-    H = np.zeros(K[0][0].shape)
-
-    for j in range(dimsK[0]):
-        for k in range(dimsK[1]):
-            H += A[j,k]*K[k][j]
-    
-    return fermifab.FermiOp(h.orbs, N, N, H)
+    return FermiOp(state.orbs, p, p, data=G)

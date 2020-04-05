@@ -3,21 +3,20 @@ from scipy.sparse import issparse
 from .fermistate import FermiState
 from .fermiop import FermiOp
 
+__all__ = ['crand', 'norm', 'kron', 'trace', 'trace_prod', 'matrix_power', 'eig', 'comprise_config']
 
-# TODO: Export kron when lists of orbs and N are implemented
-__all__ = ['crand', 'norm', 'trace', 'trace_prod', 'matrix_power', 'comprise_config', 'eig']
 
 def crand(*args):
     return 0.5 - np.random.rand(*args) + 1j*(0.5 - np.random.rand(*args))
 
-def norm(x):
-    if type(x) in [FermiState, FermiOp]:
-        return float(np.linalg.norm(x.data))
-    else:
-        return TypeError("Argument must be FermiState or FermiOp")
+
+def norm(x, ord=None):
+    """Compute the norm of a `FermiState` or `FermiOp`."""
+    return np.linalg.norm(x.data, ord)
+
 
 def kron(x, y):
-    """Kronecker tensor product of two Fermi operators"""
+    """Compute the Kronecker product of two Fermi operators."""
     if type(x) == type(y) == FermiOp:
         return FermiOp([x.orbs, y.orbs],
                        [x.pFrom, y.pFrom],
@@ -26,33 +25,34 @@ def kron(x, y):
 
     elif type(x) == type(y) == FermiState:
         return FermiState([x.orbs, y.orbs],
-                                   [x.N,    y.N],
-                                   np.kron(x.data, y.data))
+                          [x.N,    y.N],
+                          np.kron(x.data, y.data))
+
     else:
         raise TypeError("x and y must be both FermiOp or FermiState.")
 
 
-def matrix_power(x, n):
-    """Matrix power of a Fermi operator"""
-    assert x.pFrom == x.pTo
-    data = np.linalg.matrix_power(x.data, n)
-    return FermiOp(x.orbs, x.pFrom, x.pTo, data = data)
+def matrix_power(op, n):
+    """Compute the `n`-th matrix power of a Fermi operator."""
+    return FermiOp(op.orbs, op.pFrom, op.pTo, data=np.linalg.matrix_power(op.data, n))
 
-def eig(a):
+
+def eig(op):
     """Eigenvalues and eigenstates of Fermi operators"""
-    assert type(a) == FermiOp
-    D, U = np.linalg.eig(a.data)
-    return D, FermiOp(a.orbs, a.pFrom, a.pTo, U)
+    assert type(op) == FermiOp
+    D, U = np.linalg.eig(op.data)
+    return D, FermiOp(op.orbs, op.pFrom, op.pTo, U)
 
-def trace(a):
-    """Trace of a FermiOp"""
-    assert a.pFrom == a.pTo
-    return np.trace(a.data)
+
+def trace(op):
+    """Compute the trace of a `FermiOp`."""
+    return np.trace(op.data)
+
 
 def trace_prod(A, B):
     """Calculate trace(A*B) efficiently."""
     if issparse(A) or issparse(B):
-        return np.trace(A@B)
+        return np.trace(A @ B)
     else:
         return sum(A[j,:] @ B[:,j] for j in range(A.shape[0]))
 
@@ -71,8 +71,8 @@ def comprise_config(orbs1, orbs2, N1, N2):
     n2 = np.cumsum(N2)
 
     # merge tables
-    m1 = np.ones_like(cumorbs1,dtype = bool)
-    m2 = np.ones_like(cumorbs2,dtype = bool)
+    m1 = np.ones_like(cumorbs1, dtype=bool)
+    m2 = np.ones_like(cumorbs2, dtype=bool)
     orbs = [orbs1[0]]
     N = [N1[0]]
     j1 = 0

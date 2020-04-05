@@ -1,38 +1,35 @@
 import numpy as np
 from scipy.special import binom
 
-
 __all__ = ['FermiOp']
 
+
 class FermiOp(object):
-    
+
     def __init__(self, orbs, pFrom, pTo, data=None):
-        """Construct a Fermi operator between two Hilbert spaces.
+        """
+        Construct a Fermi operator mapping an antisymmetrized Hilbert space
+        to another.
 
-        Parameters:
-        ---------
-        orbs:   int
-                Number of orbitals.
-
-        pFrom:  int
-                Number of particles in the input Hilbert space.
-
-        pTo:    int
-                Number of particles in the output Hilbert space.
-
-        data:   NumPy array, optional
-                Operator matrix.
-
+        Args:
+            orbs:  number of orbitals
+            pFrom: number of particles in the input Hilbert space
+            pTo:   number of particles in the output Hilbert space
+            data:  operator matrix entries (optional)
         """
         self.orbs = orbs
         self.pFrom = pFrom
         self.pTo = pTo
-        self.shape = (int(binom(orbs, pTo)), int(binom(orbs, pFrom)))
+        shape = (int(binom(orbs, pTo)), int(binom(orbs, pFrom)))
         if data is not None:
-            assert data.shape == self.shape
+            assert data.shape == shape
             self.data = np.array(data)
         else:
-            self.data = np.zeros(self.shape, dtype=complex)
+            self.data = np.zeros(shape, dtype=complex)
+
+    @property
+    def shape(self):
+        return self.data.shape
 
     def __repr__(self):
         state_info = "Fermi Operator wedge^{0} H -> wedge^{1} H (orbs == {2})".format(self.pFrom, self.pTo, self.orbs)
@@ -43,19 +40,19 @@ class FermiOp(object):
 
     def __mul__(self, other):
         if isinstance(other, (float, complex, int)):
-            return FermiOp(self.orbs, self.pFrom, self.pTo, data = other*self.data)
+            return FermiOp(self.orbs, self.pFrom, self.pTo, data=(other*self.data))
         else:
             raise TypeError("Argument for multiplication must be numeric. For operator multiplication, use the matmul operator '@' instead.")
 
     def __rmul__(self, other):
         if isinstance(other, (float, complex, int)):
-            return FermiOp(self.orbs, self.pFrom, self.pTo, data = other*self.data)
+            return FermiOp(self.orbs, self.pFrom, self.pTo, data=(other*self.data))
         else:
             raise TypeError("Argument for multiplication must be numeric. For operator multiplication, use the matmul operator '@' instead.")
 
     def __truediv__(self, other):
         if isinstance(other, (float, complex, int)):
-            return FermiOp(self.orbs,  self.pFrom, self.pTo, data = self.data / other)
+            return FermiOp(self.orbs,  self.pFrom, self.pTo, data=(self.data / other))
         else:
             raise ValueError("Argument for division must be numeric.")
 
@@ -63,38 +60,33 @@ class FermiOp(object):
 
     def __add__(self, other):
         if type(self) == type(other):
-            assert ((self.orbs == other.orbs) & (self.pFrom == other.pFrom) & (self.pTo == other.pTo))
-            new_op = FermiOp(self.orbs, self.pFrom, self.pTo)
-            new_op.data = self.data + other.data
-            return new_op
+            assert ((self.orbs == other.orbs) and (self.pFrom == other.pFrom) and (self.pTo == other.pTo))
+            return FermiOp(self.orbs, self.pFrom, self.pTo, data=(self.data + other.data))
         else:
             raise TypeError("Addition implemented only for objects of same type")
 
     def __sub__(self, other):
         if type(self) == type(other):
-            assert ((self.orbs == other.orbs) & (self.pFrom == other.pFrom) & (self.pTo == other.pTo))
-            new_op = FermiOp(self.orbs, self.pFrom, self.pTo)
-            new_op.data = self.data - other.data
-            return new_op
+            assert ((self.orbs == other.orbs) and (self.pFrom == other.pFrom) and (self.pTo == other.pTo))
+            return FermiOp(self.orbs, self.pFrom, self.pTo, data=(self.data - other.data))
         else:
-            raise TypeError("Addition implemented only for objects of same type")
-    
+            raise TypeError("Subtraction implemented only for objects of same type")
+
     def __matmul__(self, other):
         if type(self) == type(other):
             assert((self.orbs == other.orbs) and (self.shape[1] == other.shape[0]))
-            mul_data = self.data @ other.data
-            return FermiOp(self.orbs, other.pFrom, self.pTo, data = mul_data)
+            return FermiOp(self.orbs, other.pFrom, self.pTo, data=(self.data @ other.data))
         else:
-            return NotImplemented 
+            return NotImplemented
             #raise TypeError("Operator multiplication only implemented for:\n\t\t * FermiOp @ FermiOp --> FermiOp\n\t\t * FermiState @ FermiOp --> FermiOp\n\t\t * FermiOp @ FermiState --> Complex Number ")
-    
-    # Hermitian conjugate:
+
+    # Hermitian conjugate
     def dagger(self):
         return FermiOp(self.orbs, self.pTo, self.pFrom, self.data.conj().T)
-    
+
     @property
     def H(self):
         return self.dagger()
 
     def copy(self):
-        return FermiOp(self.orbs, self.pFrom, self.pTo, self.data)
+        return FermiOp(self.orbs, self.pFrom, self.pTo, self.data.copy())

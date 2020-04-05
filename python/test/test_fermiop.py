@@ -3,7 +3,9 @@ import numpy as np
 import fermifab
 import unittest
 
+
 class TestFermiOp(unittest.TestCase):
+
     def test_arithmetic_operators(self):
         orbs = 6
         N = 4
@@ -33,15 +35,14 @@ class TestFermiOp(unittest.TestCase):
         psi = psi/fermifab.norm(psi)
         rho = psi @ psi.H
 
-        
-        self.assertAlmostEqual((psi.H @ psi),1)
+        self.assertAlmostEqual((psi.H @ psi).data[0], 1)
 
         err = np.linalg.norm((rho @ psi).data - psi.data)
         self.assertAlmostEqual(err, 0)
 
         err = fermifab.norm(rho @ rho - rho)
         self.assertAlmostEqual(err, 0)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

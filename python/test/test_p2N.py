@@ -12,7 +12,7 @@ class TestP2N(unittest.TestCase):
         # random wavefunction "psi"
         psi = fermifab.FermiState(orbs, N, data=fermifab.crand(int(binom(orbs, N))))
 
-        return abs(psi.H @ fermifab.p2N(h, N) @ psi - fermifab.trace(h @ fermifab.rdm(psi, p)))
+        return abs((psi.H @ fermifab.p2N(h, N) @ psi).data[0] - fermifab.trace(h @ fermifab.rdm(psi, p)))
 
     def test_p2N(self):
         self.assertAlmostEqual(self._p2N_err(6, 2, 4), 0)

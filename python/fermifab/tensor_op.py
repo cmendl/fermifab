@@ -1,6 +1,6 @@
-import fermifab.kernel
 from scipy.sparse import csr_matrix
-from fermifab.fermiop import FermiOp
+from .fermiop import FermiOp
+import fermifab.kernel
 
 __all__ = ['tensor_op']
 
@@ -10,7 +10,7 @@ def tensor_op(op, N):
     Calculate the matrix representation of the N-fold tensor product of an operator.
 
     Args:
-        op: quantum operator of type 'FermiOp', with 'pFrom' and 'pTo' equal to 1
+        op: quantum operator of type `FermiOp`, with `pFrom` and `pTo` equal to 1
         N:  number of tensor factors
 
     Returns:
