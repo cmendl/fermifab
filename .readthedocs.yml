@@ -17,3 +17,4 @@ python:
     - requirements: python/requirements.txt
     - method: setuptools
       path: python
+  system_packages: true
