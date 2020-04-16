@@ -9,14 +9,3 @@ version: 2
 sphinx:
   builder: html
   configuration: python/doc/conf.py
-
-# Optionally set the version of Python and requirements required to build your docs
-python:
-  version: 3.7
-  install:
-    - requirements: python/requirements.txt
-    - method: setuptools
-      path: python/doc
-    - method: setuptools
-      path: python
-  system_packages: true

@@ -12,11 +12,19 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
+
+# generate dummy "kernel" file such that we don't have to actually compile the C extension
+with open('../fermifab/kernel.py', 'w') as f:
+    f.write('def gen_rdm(orbs, p1, N1, N2):\n')
+    f.write('    return (None, None, None)\n')
 
 import fermifab
+
+# dummy file no longer needed
+os.remove('../fermifab/kernel.py')
 
 
 # -- Project information -----------------------------------------------------
