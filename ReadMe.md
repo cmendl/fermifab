@@ -7,8 +7,10 @@ Python
 ------
 ![](https://github.com/cmendl/fermifab/workflows/python_unittest/badge.svg)
 
-- Installation: run `python setup.py install --user` from the python/ subfolder (or `python3 ...` instead of `python ...`)
-- Documentation: [user guide](python/doc/user_guide.ipynb)
+- Installation:
+  1. requirements: `sudo apt install libblas-dev liblapacke-dev` (on Ubuntu Linux) or similar, and `pip install -r python/requirements.txt`
+  2. run `python setup.py install --user` from the python/ subfolder (or `python3 ...` instead of `python ...`)
+- Documentation: [fermifab.readthedocs.io](https://fermifab.readthedocs.io), [user guide](python/doc/user_guide.ipynb)
 
 Matlab
 ------
