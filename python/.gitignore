@@ -1,0 +1,9 @@
+# ignore built files
+build/*
+
+# ignore Jupyter Notebook and pyc files
+**/.ipynb_checkpoints
+*.pyc
+
+# ignore development test files
+development_tests/*
