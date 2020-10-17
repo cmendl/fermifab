@@ -102,6 +102,14 @@ End[] (* end `Private` section *)
 
 p2N[h_,orbs_,p_,N_]:=Module[{K=MLGenerateRDM[orbs,p,N]},Sum[h[[i,j]]K[[j,i]],{i,Dimensions[h][[1]]},{j,Dimensions[h][[2]]}]]
 
+(* annihilation operator on full Fock space *)
+AnnihilOp[orbs_,a_]:=SparseArray[Select[Table[Rule[{n-a,n}+1,If[BitAnd[n,a]==a,AnnihilSign[n,a],0]],{n,0,2^orbs-1}],Last[#]!=0&],{2^orbs,2^orbs}]
+(* creation operator on full Fock space *)
+CreateOp[orbs_,c_]:=SparseArray[Select[Table[Rule[{n+c,n}+1,If[BitAnd[n,c]==0,CreateSign[n,c],0]],{n,0,2^orbs-1}],Last[#]!=0&],{2^orbs,2^orbs}]
+
+(* number operator on full Fock space *)
+NumberOp[orbs_,f_]:=SparseArray[Select[Table[Rule[{n,n}+1,If[BitAnd[n,f]==f,1,0]],{n,0,2^orbs-1}],Last[#]!=0&],{2^orbs,2^orbs}]
+
 TensorOp[A_,fm_List]:=Module[{Afm},
 	Afm=Outer[Det[A[[FermiToCoords[#1],FermiToCoords[#2]]]]&,fm,fm];
 	If[Head[A]===SparseArray,Afm=SparseArray[Afm]];Afm]
